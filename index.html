@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>دفتر نوبت‌ها</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#15110c;
+    --bg-2:#1b1611;
+    --surface:#221b14;
+    --surface-2:#2b2216;
+    --border:#3a2f21;
+    --gold:#c9a25c;
+    --gold-dim:#8f7643;
+    --gold-glow:rgba(201,162,92,0.16);
+    --rust:#9a5240;
+    --text:#f3ead9;
+    --text-dim:#a89478;
+    --text-faint:#6f6250;
+    --sage:#7f9a72;
+    --danger:#b3563f;
+    --radius-card:14px;
+    --radius-sheet:22px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Vazirmatn', Tahoma, sans-serif;
+    background:
+      radial-gradient(600px 300px at 50% -60px, var(--gold-glow), transparent 70%),
+      var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  #app{
+    width:100%;
+    max-width:460px;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    background:linear-gradient(180deg, transparent 0%, var(--bg) 220px);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    padding:28px 22px 18px;
+  }
+  .brand-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .brand-logo{
+    width:25px;height:25px;
+    flex-shrink:0;
+    color:var(--gold);
+  }
+  .brand-name{
+    font-size:21px;
+    font-weight:800;
+    letter-spacing:1.8px;
+  }
+  .brand-name .b1{color:var(--text);}
+  .brand-name .b2{color:var(--gold);}
+  .header-sub{
+    font-size:13px;
+    color:var(--text-dim);
+    display:flex;
+    align-items:center;
+    gap:7px;
+  }
+  .header-sub #today-weekday{color:var(--gold); font-weight:600;}
+  .header-sub .dot-sep{
+    width:3px;height:3px;
+    border-radius:50%;
+    background:var(--text-faint);
+  }
+
+  /* ---------- Main content ---------- */
+  main{
+    flex:1;
+    padding:4px 18px calc(140px + var(--safe-bottom));
+    overflow-y:auto;
+  }
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* Section label */
+  .count-label{
+    font-size:13px;
+    color:var(--text-dim);
+    margin:10px 4px 14px;
+  }
+
+  /* ---------- Appointment card ---------- */
+  .appt-card{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius-card);
+    padding:14px 16px;
+    margin-bottom:10px;
+    position:relative;
+    animation:cardIn .35s ease both;
+  }
+  @keyframes cardIn{
+    from{opacity:0; transform:translateY(6px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .appt-time{
+    font-size:17px;
+    font-weight:700;
+    color:var(--gold);
+    min-width:52px;
+    text-align:center;
+    line-height:1.25;
+    border-left:1px solid var(--border);
+    padding-left:14px;
+  }
+  .appt-info{flex:1; min-width:0;}
+  .appt-name{
+    font-size:15px;
+    font-weight:600;
+    color:var(--text);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .appt-phone{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-top:3px;
+    direction:ltr;
+    text-align:right;
+  }
+  .appt-del{
+    width:30px;height:30px;
+    border-radius:50%;
+    border:none;
+    background:transparent;
+    color:var(--text-faint);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:background .15s, color .15s;
+  }
+  .appt-del:active{background:rgba(179,86,63,.18); color:var(--danger);}
+  .appt-del svg{width:16px;height:16px;}
+
+  /* ---------- Empty state ---------- */
+  .empty-state{
+    text-align:center;
+    padding:56px 20px 20px;
+    color:var(--text-dim);
+  }
+  .empty-state svg{width:52px;height:52px; color:var(--text-faint); margin-bottom:14px;}
+  .empty-state p{font-size:14.5px; line-height:1.9;}
+
+  /* ---------- Calendar ---------- */
+  .cal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:8px 2px 16px;
+  }
+  .cal-title{font-size:16px; font-weight:700; color:var(--text);}
+  .cal-nav{
+    width:34px;height:34px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-dim);
+    cursor:pointer;
+  }
+  .cal-nav svg{width:16px;height:16px;}
+  .cal-weekdays{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    text-align:center;
+    font-size:12px;
+    color:var(--text-faint);
+    margin-bottom:8px;
+  }
+  .cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    row-gap:4px;
+  }
+  .cal-day{
+    position:relative;
+    aspect-ratio:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:13.5px;
+    color:var(--text);
+    border-radius:50%;
+    cursor:pointer;
+  }
+  .cal-day.empty{cursor:default;}
+  .cal-day .dot{
+    position:absolute;
+    bottom:4px;
+    width:4px;height:4px;
+    border-radius:50%;
+    background:var(--sage);
+  }
+  .cal-day.today{color:var(--gold); font-weight:700;}
+  .cal-day.selected{
+    background:var(--gold);
+    color:#1c1610;
+    font-weight:700;
+  }
+  .cal-day.selected .dot{background:#1c1610;}
+
+  .selected-date-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin:22px 2px 12px;
+  }
+  .selected-date-row h2{font-size:15px; font-weight:600; color:var(--text);}
+  .add-inline-btn{
+    font-size:12.5px;
+    color:var(--gold);
+    background:var(--gold-glow);
+    border:1px solid var(--gold-dim);
+    border-radius:999px;
+    padding:7px 14px;
+    cursor:pointer;
+  }
+
+  /* ---------- Tab bar ---------- */
+  .tabbar-wrap{
+    position:fixed;
+    bottom:0; left:50%; transform:translateX(-50%);
+    width:100%; max-width:460px;
+    padding:0 18px calc(18px + var(--safe-bottom));
+    display:flex;
+    justify-content:center;
+    pointer-events:none;
+  }
+  .tabbar{
+    pointer-events:auto;
+    position:relative;
+    width:100%;
+    max-width:280px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:999px;
+    display:flex;
+    padding:5px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  .tabbar .pill{
+    position:absolute;
+    top:5px; bottom:5px;
+    width:calc(50% - 5px);
+    background:var(--gold);
+    border-radius:999px;
+    transition:transform .28s cubic-bezier(.65,0,.35,1);
+    z-index:0;
+  }
+  .tab-btn{
+    flex:1;
+    z-index:1;
+    border:none;
+    background:transparent;
+    padding:10px 0;
+    font-family:inherit;
+    font-size:14px;
+    font-weight:600;
+    color:var(--text-dim);
+    cursor:pointer;
+    border-radius:999px;
+    transition:color .2s;
+  }
+  .tab-btn.active{color:#1c1610;}
+
+  /* ---------- FAB ---------- */
+  .fab{
+    position:fixed;
+    bottom:calc(92px + var(--safe-bottom));
+    left:50%;
+    transform:translateX(calc(-1 * min(50%,230px) + 34px));
+    width:54px;height:54px;
+    border-radius:50%;
+    background:var(--gold);
+    border:none;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 8px 22px rgba(201,162,92,.35);
+    cursor:pointer;
+    z-index:5;
+    transition:transform .15s;
+  }
+  .fab:active{transform:translateX(calc(-1 * min(50%,230px) + 34px)) scale(.92);}
+  .fab svg{width:24px;height:24px; color:#1c1610;}
+
+  /* ---------- Sheet / modal ---------- */
+  .backdrop{
+    position:fixed; inset:0;
+    background:rgba(10,8,6,.6);
+    backdrop-filter:blur(2px);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s;
+    z-index:10;
+  }
+  .backdrop.show{opacity:1; pointer-events:auto;}
+
+  .sheet{
+    position:fixed;
+    left:50%; bottom:0;
+    transform:translate(-50%, 100%);
+    width:100%; max-width:460px;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    border-bottom:none;
+    border-radius:var(--radius-sheet) var(--radius-sheet) 0 0;
+    padding:10px 22px calc(26px + var(--safe-bottom));
+    transition:transform .3s cubic-bezier(.32,.72,0,1);
+    z-index:11;
+    max-height:88vh;
+    overflow-y:auto;
+  }
+  .sheet.show{transform:translate(-50%, 0);}
+  .sheet-handle{
+    width:38px; height:4px;
+    background:var(--border);
+    border-radius:99px;
+    margin:6px auto 18px;
+  }
+  .sheet h3{font-size:17px; font-weight:700; margin-bottom:20px;}
+  .field{margin-bottom:16px;}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-bottom:7px;
+  }
+  .field input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 14px;
+    font-family:inherit;
+    font-size:14.5px;
+    color:var(--text);
+    outline:none;
+  }
+  .field input:focus{border-color:var(--gold-dim);}
+  .field input[type="tel"]{direction:ltr; text-align:right;}
+  .row3, .row2{
+    display:grid;
+    gap:8px;
+  }
+  .row3{grid-template-columns:1.3fr 1fr 1fr;}
+  .row2{grid-template-columns:1fr 1fr;}
+  select{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:12px 8px;
+    font-family:inherit;
+    font-size:13.5px;
+    color:var(--text);
+    outline:none;
+    text-align:center;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+  select:focus{border-color:var(--gold-dim);}
+  .submit-btn{
+    width:100%;
+    background:var(--gold);
+    color:#1c1610;
+    border:none;
+    border-radius:999px;
+    padding:15px 0;
+    font-family:inherit;
+    font-size:15px;
+    font-weight:700;
+    margin-top:8px;
+    cursor:pointer;
+  }
+  .submit-btn:active{opacity:.85;}
+  .error-msg{
+    font-size:12.5px;
+    color:var(--danger);
+    margin-top:-8px;
+    margin-bottom:14px;
+    display:none;
+  }
+  .error-msg.show{display:block;}
+
+  /* ---------- Confirm delete modal ---------- */
+  .confirm-box{
+    position:fixed;
+    left:50%; top:50%;
+    transform:translate(-50%,-50%) scale(.9);
+    width:calc(100% - 60px);
+    max-width:320px;
+    background:var(--bg-2);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:22px 20px;
+    z-index:21;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s, transform .2s;
+  }
+  .confirm-box.show{opacity:1; transform:translate(-50%,-50%) scale(1); pointer-events:auto;}
+  .confirm-box p{font-size:14px; line-height:1.8; margin-bottom:18px; color:var(--text);}
+  .confirm-box .btn-row{display:flex; gap:10px;}
+  .confirm-box button{
+    flex:1;
+    border:none;
+    border-radius:999px;
+    padding:11px 0;
+    font-family:inherit;
+    font-size:13.5px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn-cancel{background:var(--surface); color:var(--text-dim); border:1px solid var(--border) !important;}
+  .btn-danger{background:var(--danger); color:#fff;}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;
+    top:18px; left:50%;
+    transform:translate(-50%,-40px);
+    background:var(--surface-2);
+    border:1px solid var(--gold-dim);
+    color:var(--text);
+    padding:12px 20px;
+    border-radius:999px;
+    font-size:13.5px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    opacity:0;
+    transition:transform .3s cubic-bezier(.32,.72,0,1), opacity .3s;
+    z-index:30;
+    box-shadow:0 10px 24px rgba(0,0,0,.4);
+    white-space:nowrap;
+  }
+  .toast.show{transform:translate(-50%,0); opacity:1;}
+  .toast svg{width:16px;height:16px; color:var(--sage); flex-shrink:0;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand-row" dir="ltr">
+      <svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 8 L27 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M5 24 L27 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="7" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/>
+        <circle cx="7" cy="24" r="3.2" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <div class="brand-name"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
+    </div>
+    <div class="header-sub">
+      <span id="today-weekday">امروز</span>
+      <span class="dot-sep"></span>
+      <span id="today-full-date">—</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Today view -->
+    <section class="view active" id="view-today">
+      <div class="count-label" id="today-count">—</div>
+      <div id="today-list"></div>
+    </section>
+
+    <!-- Calendar view -->
+    <section class="view" id="view-calendar">
+      <div class="cal-head">
+        <div class="cal-nav" id="cal-prev">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="cal-title" id="cal-title">—</div>
+        <div class="cal-nav" id="cal-next">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+      </div>
+      <div class="cal-weekdays">
+        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+
+      <div class="selected-date-row">
+        <h2 id="selected-date-label">—</h2>
+        <button class="add-inline-btn" id="add-for-day">ثبت نوبت</button>
+      </div>
+      <div id="calendar-day-list"></div>
+    </section>
+  </main>
+
+  <button class="fab" id="fab-add" aria-label="ثبت نوبت">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  </button>
+
+  <div class="tabbar-wrap">
+    <div class="tabbar">
+      <div class="pill" id="tab-pill"></div>
+      <button class="tab-btn active" id="tab-today" data-tab="today">امروز</button>
+      <button class="tab-btn" id="tab-calendar" data-tab="calendar">تقویم</button>
+    </div>
+  </div>
+
+  <!-- Add appointment sheet -->
+  <div class="backdrop" id="backdrop"></div>
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <h3>ثبت نوبت جدید</h3>
+    <div class="field">
+      <label>نام مشتری</label>
+      <input type="text" id="input-name" placeholder="مثلاً رضا محمدی" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>شماره تماس</label>
+      <input type="tel" id="input-phone" placeholder="۰۹۱۲۱۲۳۴۵۶۷" autocomplete="off">
+    </div>
+    <div class="error-msg" id="form-error">لطفاً نام و شماره تماس رو وارد کنید</div>
+
+    <div class="field" id="date-field">
+      <label>تاریخ نوبت</label>
+      <div class="row3">
+        <select id="sel-month"></select>
+        <select id="sel-day"></select>
+        <select id="sel-year"></select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>ساعت نوبت</label>
+      <div class="row2">
+        <select id="sel-minute"></select>
+        <select id="sel-hour"></select>
+      </div>
+    </div>
+
+    <button class="submit-btn" id="submit-appt">ثبت نوبت</button>
+  </div>
+
+  <!-- Delete confirm -->
+  <div class="confirm-box" id="confirm-box">
+    <p id="confirm-text">این نوبت حذف بشه؟</p>
+    <div class="btn-row">
+      <button class="btn-cancel" id="confirm-cancel">انصراف</button>
+      <button class="btn-danger" id="confirm-delete">حذف نوبت</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="toast-text">نوبت ثبت شد</span>
+  </div>
+
+</div>
+
+<script>
+/* ============ Jalali calendar conversion ============ */
+function gregorianToJalali(gy, gm, gd) {
+  var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  var jy;
+  if (gy > 1600) { jy = 979; gy -= 1600; } else { jy = 0; gy -= 621; }
+  var gy2 = (gm > 2) ? (gy + 1) : gy;
+  var days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) + (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+  jy += 33 * parseInt(days / 12053);
+  days %= 12053;
+  jy += 4 * parseInt(days / 1461);
+  days %= 1461;
+  if (days > 365) { jy += parseInt((days - 1) / 365); days = (days - 1) % 365; }
+  var jm, jd;
+  if (days < 186) { jm = 1 + parseInt(days / 31); jd = 1 + (days % 31); }
+  else { jm = 7 + parseInt((days - 186) / 30); jd = 1 + ((days - 186) % 30); }
+  return [jy, jm, jd];
+}
+function jalaliToGregorian(jy, jm, jd) {
+  var gy;
+  if (jy > 979) { gy = 1600; jy -= 979; } else { gy = 621; }
+  var days = (365 * jy) + (parseInt(jy / 33) * 8) + parseInt(((jy % 33) + 3) / 4) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+  gy += 400 * parseInt(days / 146097);
+  days %= 146097;
+  var leapAdjust = false;
+  if (days > 36524) {
+    days -= 1;
+    gy += 100 * parseInt(days / 36524);
+    days %= 36524;
+    if (days >= 365) days++;
+  }
+  gy += 4 * parseInt(days / 1461);
+  days %= 1461;
+  if (days > 365) { gy += parseInt((days - 1) / 365); days = (days - 1) % 365; }
+  var gd = days + 1;
+  var sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  var gm;
+  for (gm = 0; gm < 13; gm++) {
+    var v = sal_a[gm];
+    if (gd <= v) break;
+    gd -= v;
+  }
+  return [gy, gm, gd];
+}
+function isLeapJalali(jy) {
+  var breaks = [1,5,9,13,17,22,26,30];
+  return breaks.indexOf(((jy % 33) + 33) % 33) >= 0;
+}
+function jalaliMonthLength(jy, jm) {
+  if (jm <= 6) return 31;
+  if (jm <= 11) return 30;
+  return isLeapJalali(jy) ? 30 : 29;
+}
+const MONTH_NAMES = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WEEKDAY_FULL = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه']; // index = JS getDay()
+function toFa(n){ return String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]); }
+function pad2(n){ return n<10 ? '0'+n : ''+n; }
+
+/* ============ State ============ */
+const now = new Date();
+const [TODAY_JY, TODAY_JM, TODAY_JD] = gregorianToJalali(now.getFullYear(), now.getMonth()+1, now.getDate());
+
+let appointments = [];
+let activeTab = 'today';
+let calViewYear = TODAY_JY;
+let calViewMonth = TODAY_JM;
+let selectedDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
+let pendingDeleteId = null;
+let sheetContextDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
+
+/* ============ Storage ============ */
+async function loadAppointments(){
+  try{
+    const r = await window.storage.get('appointments');
+    appointments = r && r.value ? JSON.parse(r.value) : [];
+  }catch(e){
+    appointments = [];
+  }
+  renderToday();
+  renderCalendar();
+}
+async function saveAppointments(){
+  try{
+    await window.storage.set('appointments', JSON.stringify(appointments), false);
+  }catch(e){
+    console.error('storage save failed', e);
+  }
+}
+
+/* ============ Header date ============ */
+function renderHeader(){
+  document.getElementById('today-weekday').textContent = 'امروز، ' + WEEKDAY_FULL[now.getDay()];
+  document.getElementById('today-full-date').textContent =
+    toFa(TODAY_JD) + ' ' + MONTH_NAMES[TODAY_JM-1] + ' ' + toFa(TODAY_JY);
+}
+
+/* ============ Today view ============ */
+function apptSortKey(a){ return a.hour*60 + a.minute; }
+
+function renderToday(){
+  const list = appointments
+    .filter(a => a.jy===TODAY_JY && a.jm===TODAY_JM && a.jd===TODAY_JD)
+    .sort((a,b)=>apptSortKey(a)-apptSortKey(b));
+
+  const countEl = document.getElementById('today-count');
+  const listEl = document.getElementById('today-list');
+  listEl.innerHTML = '';
+
+  if(list.length===0){
+    countEl.textContent = 'نوبتی برای امروز ثبت نشده';
+    listEl.innerHTML = `
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
+        <p>هنوز نوبتی برای امروز ثبت نکردی.<br>با دکمه پایین صفحه یه نوبت جدید اضافه کن.</p>
+      </div>`;
+    return;
+  }
+  countEl.textContent = toFa(list.length) + ' نوبت برای امروز';
+  list.forEach(a => listEl.appendChild(buildApptCard(a)));
+}
+
+function buildApptCard(a){
+  const div = document.createElement('div');
+  div.className = 'appt-card';
+  div.innerHTML = `
+    <div class="appt-time">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
+    <div class="appt-info">
+      <div class="appt-name">${escapeHtml(a.name)}</div>
+      <div class="appt-phone">${escapeHtml(a.phone)}</div>
+    </div>
+    <button class="appt-del" data-id="${a.id}" aria-label="حذف">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>`;
+  div.querySelector('.appt-del').addEventListener('click', () => openDeleteConfirm(a));
+  return div;
+}
+function escapeHtml(s){
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+/* ============ Calendar view ============ */
+function renderCalendar(){
+  document.getElementById('cal-title').textContent = MONTH_NAMES[calViewMonth-1] + ' ' + toFa(calViewYear);
+
+  const [gy,gm,gd] = jalaliToGregorian(calViewYear, calViewMonth, 1);
+  const firstWeekdayJs = new Date(gy, gm-1, gd).getDay(); // 0=Sun
+  const leadingEmpty = (firstWeekdayJs + 1) % 7; // Sat-first index
+  const monthLen = jalaliMonthLength(calViewYear, calViewMonth);
+
+  const apptDaySet = new Set(
+    appointments
+      .filter(a => a.jy===calViewYear && a.jm===calViewMonth)
+      .map(a => a.jd)
+  );
+
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = '';
+
+  for(let i=0;i<leadingEmpty;i++){
+    const cell = document.createElement('div');
+    cell.className = 'cal-day empty';
+    grid.appendChild(cell);
+  }
+  for(let d=1; d<=monthLen; d++){
+    const cell = document.createElement('div');
+    let cls = 'cal-day';
+    if(calViewYear===TODAY_JY && calViewMonth===TODAY_JM && d===TODAY_JD) cls += ' today';
+    if(calViewYear===selectedDate.jy && calViewMonth===selectedDate.jm && d===selectedDate.jd) cls += ' selected';
+    cell.className = cls;
+    cell.textContent = toFa(d);
+    if(apptDaySet.has(d)){
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      cell.appendChild(dot);
+    }
+    cell.addEventListener('click', () => {
+      selectedDate = { jy: calViewYear, jm: calViewMonth, jd: d };
+      renderCalendar();
+      renderDayList();
+    });
+    grid.appendChild(cell);
+  }
+  renderDayList();
+}
+
+function renderDayList(){
+  const label = document.getElementById('selected-date-label');
+  const isToday = selectedDate.jy===TODAY_JY && selectedDate.jm===TODAY_JM && selectedDate.jd===TODAY_JD;
+  label.textContent = (isToday ? 'امروز، ' : '') + toFa(selectedDate.jd) + ' ' + MONTH_NAMES[selectedDate.jm-1] + ' ' + toFa(selectedDate.jy);
+
+  const list = appointments
+    .filter(a => a.jy===selectedDate.jy && a.jm===selectedDate.jm && a.jd===selectedDate.jd)
+    .sort((a,b)=>apptSortKey(a)-apptSortKey(b));
+
+  const listEl = document.getElementById('calendar-day-list');
+  listEl.innerHTML = '';
+  if(list.length===0){
+    listEl.innerHTML = `<div class="empty-state" style="padding:24px 10px 4px;">
+      <p>برای این روز نوبتی ثبت نشده</p>
+    </div>`;
+    return;
+  }
+  list.forEach(a => listEl.appendChild(buildApptCard(a)));
+}
+
+/* ============ Tabs ============ */
+function setTab(tab){
+  activeTab = tab;
+  document.getElementById('view-today').classList.toggle('active', tab==='today');
+  document.getElementById('view-calendar').classList.toggle('active', tab==='calendar');
+  document.getElementById('tab-today').classList.toggle('active', tab==='today');
+  document.getElementById('tab-calendar').classList.toggle('active', tab==='calendar');
+  document.getElementById('tab-pill').style.transform = tab==='today' ? 'translateX(0)' : 'translateX(-100%)';
+}
+document.getElementById('tab-today').addEventListener('click', ()=>setTab('today'));
+document.getElementById('tab-calendar').addEventListener('click', ()=>setTab('calendar'));
+
+document.getElementById('cal-prev').addEventListener('click', ()=>{
+  calViewMonth--; if(calViewMonth<1){calViewMonth=12; calViewYear--;}
+  renderCalendar();
+});
+document.getElementById('cal-next').addEventListener('click', ()=>{
+  calViewMonth++; if(calViewMonth>12){calViewMonth=1; calViewYear++;}
+  renderCalendar();
+});
+
+/* ============ Add appointment sheet ============ */
+const backdrop = document.getElementById('backdrop');
+const sheet = document.getElementById('sheet');
+
+function populateSelects(){
+  const selMonth = document.getElementById('sel-month');
+  selMonth.innerHTML = MONTH_NAMES.map((m,i)=>`<option value="${i+1}">${m}</option>`).join('');
+
+  const selYear = document.getElementById('sel-year');
+  const years = [TODAY_JY-1, TODAY_JY, TODAY_JY+1];
+  selYear.innerHTML = years.map(y=>`<option value="${y}">${toFa(y)}</option>`).join('');
+
+  const selHour = document.getElementById('sel-hour');
+  let hourOpts = '';
+  for(let h=8; h<=23; h++) hourOpts += `<option value="${h}">${toFa(pad2(h))}</option>`;
+  selHour.innerHTML = hourOpts;
+
+  const selMinute = document.getElementById('sel-minute');
+  selMinute.innerHTML = [0,30].map(m=>`<option value="${m}">${toFa(pad2(m))}</option>`).join('');
+
+  document.getElementById('sel-month').addEventListener('change', updateDayOptions);
+  document.getElementById('sel-year').addEventListener('change', updateDayOptions);
+}
+function updateDayOptions(){
+  const y = parseInt(document.getElementById('sel-year').value);
+  const m = parseInt(document.getElementById('sel-month').value);
+  const len = jalaliMonthLength(y, m);
+  const selDay = document.getElementById('sel-day');
+  const prevVal = parseInt(selDay.value) || 1;
+  let opts = '';
+  for(let d=1; d<=len; d++) opts += `<option value="${d}">${toFa(d)}</option>`;
+  selDay.innerHTML = opts;
+  selDay.value = Math.min(prevVal, len);
+}
+
+function openSheet(dateCtx, showDate){
+  sheetContextDate = dateCtx;
+  document.getElementById('date-field').style.display = showDate ? '' : 'none';
+  document.getElementById('input-name').value = '';
+  document.getElementById('input-phone').value = '';
+  document.getElementById('form-error').classList.remove('show');
+  document.getElementById('sel-year').value = dateCtx.jy;
+  document.getElementById('sel-month').value = dateCtx.jm;
+  updateDayOptions();
+  document.getElementById('sel-day').value = dateCtx.jd;
+
+  // default time: round up to next half hour from now, within 8-23 range
+  let h = now.getHours(), min = now.getMinutes() < 30 ? 30 : 0;
+  if(min===0) h += 1;
+  if(h<9) h = 9;
+  if(h>23) h = 23;
+  document.getElementById('sel-hour').value = h;
+  document.getElementById('sel-minute').value = min===30?30:0;
+
+  backdrop.classList.add('show');
+  sheet.classList.add('show');
+}
+function closeSheet(){
+  backdrop.classList.remove('show');
+  sheet.classList.remove('show');
+}
+backdrop.addEventListener('click', () => { closeSheet(); closeConfirm(); });
+
+document.getElementById('fab-add').addEventListener('click', () => {
+  const ctx = activeTab==='calendar' ? selectedDate : {jy:TODAY_JY, jm:TODAY_JM, jd:TODAY_JD};
+  openSheet(ctx, activeTab==='calendar');
+});
+document.getElementById('add-for-day').addEventListener('click', () => openSheet(selectedDate, true));
+
+document.getElementById('submit-appt').addEventListener('click', async () => {
+  const name = document.getElementById('input-name').value.trim();
+  const phone = document.getElementById('input-phone').value.trim();
+  const errEl = document.getElementById('form-error');
+  if(!name || !phone){
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
+  const jy = parseInt(document.getElementById('sel-year').value);
+  const jm = parseInt(document.getElementById('sel-month').value);
+  const jd = parseInt(document.getElementById('sel-day').value);
+  const hour = parseInt(document.getElementById('sel-hour').value);
+  const minute = parseInt(document.getElementById('sel-minute').value);
+
+  appointments.push({
+    id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
+    name, phone, jy, jm, jd, hour, minute
+  });
+  await saveAppointments();
+  closeSheet();
+  renderToday();
+  renderCalendar();
+  showToast('نوبت ثبت شد');
+});
+
+/* ============ Delete confirm ============ */
+const confirmBox = document.getElementById('confirm-box');
+function openDeleteConfirm(a){
+  pendingDeleteId = a.id;
+  document.getElementById('confirm-text').textContent =
+    `نوبت ${a.name} ساعت ${toFa(pad2(a.hour))}:${toFa(pad2(a.minute))} حذف بشه؟`;
+  backdrop.classList.add('show');
+  confirmBox.classList.add('show');
+}
+function closeConfirm(){
+  confirmBox.classList.remove('show');
+  if(!sheet.classList.contains('show')) backdrop.classList.remove('show');
+}
+document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+  appointments = appointments.filter(a => a.id !== pendingDeleteId);
+  pendingDeleteId = null;
+  await saveAppointments();
+  closeConfirm();
+  backdrop.classList.remove('show');
+  renderToday();
+  renderCalendar();
+  showToast('نوبت حذف شد');
+});
+
+/* ============ Toast ============ */
+let toastTimer = null;
+function showToast(text){
+  const toast = document.getElementById('toast');
+  document.getElementById('toast-text').textContent = text;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
+}
+
+/* ============ Init ============ */
+renderHeader();
+populateSelects();
+loadAppointments();
+</script>
+</body>
+</html>
