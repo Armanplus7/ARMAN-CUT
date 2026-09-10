@@ -667,23 +667,18 @@ let selectedDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
 let pendingDeleteId = null;
 let sheetContextDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
 
-/* ============ Storage ============ */
+/* ============ Data loading (API) ============ */
 async function loadAppointments(){
   try{
-    const r = await window.storage.get('appointments');
-    appointments = r && r.value ? JSON.parse(r.value) : [];
+    const res = await fetch('/api/appointments');
+    if(!res.ok) throw new Error('bad status');
+    appointments = await res.json();
   }catch(e){
     appointments = [];
+    showToast('اتصال به سرور برقرار نشد');
   }
   renderToday();
   renderCalendar();
-}
-async function saveAppointments(){
-  try{
-    await window.storage.set('appointments', JSON.stringify(appointments), false);
-  }catch(e){
-    console.error('storage save failed', e);
-  }
 }
 
 /* ============ Header date ============ */
@@ -890,6 +885,7 @@ function openAddSheet(dateCtx, showDate){
   document.getElementById('date-field').style.display = showDate ? '' : 'none';
   document.getElementById('input-name').value = '';
   document.getElementById('input-phone').value = '';
+  document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
   fillDateSelects(dateCtx.jy, dateCtx.jm, dateCtx.jd);
@@ -913,6 +909,7 @@ function openEditSheet(appt){
   document.getElementById('date-field').style.display = '';
   document.getElementById('input-name').value = appt.name || '';
   document.getElementById('input-phone').value = appt.phone || '';
+  document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
   fillDateSelects(appt.jy, appt.jm, appt.jd);
@@ -937,6 +934,7 @@ document.getElementById('submit-appt').addEventListener('click', async () => {
   timeErrEl.classList.remove('show');
 
   if(!name && !phone){
+    errEl.textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
     errEl.classList.add('show');
     return;
   }
@@ -956,24 +954,46 @@ document.getElementById('submit-appt').addEventListener('click', async () => {
     return;
   }
 
-  if(editingId){
-    const appt = appointments.find(a => a.id === editingId);
-    if(appt) Object.assign(appt, {name, phone, jy, jm, jd, hour, minute});
-    await saveAppointments();
+  const payload = { name, phone, jy, jm, jd, hour, minute };
+  const submitBtn = document.getElementById('submit-appt');
+  submitBtn.disabled = true;
+
+  try{
+    const res = editingId
+      ? await fetch('/api/appointments/' + editingId, {
+          method:'PUT',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        })
+      : await fetch('/api/appointments', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        });
+
+    if(res.status === 409){
+      timeErrEl.classList.add('show');
+      document.getElementById('sel-hour').scrollIntoView({behavior:'smooth', block:'center'});
+      return;
+    }
+    if(!res.ok) throw new Error('request failed');
+
+    const saved = await res.json();
+    if(editingId){
+      const idx = appointments.findIndex(a => a.id === editingId);
+      if(idx > -1) appointments[idx] = saved;
+    } else {
+      appointments.push(saved);
+    }
     closeSheet();
     renderToday();
     renderCalendar();
-    showToast('نوبت به‌روزرسانی شد');
-  } else {
-    appointments.push({
-      id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
-      name, phone, jy, jm, jd, hour, minute
-    });
-    await saveAppointments();
-    closeSheet();
-    renderToday();
-    renderCalendar();
-    showToast('نوبت ثبت شد');
+    showToast(editingId ? 'نوبت به‌روزرسانی شد' : 'نوبت ثبت شد');
+  }catch(e){
+    errEl.textContent = 'خطا در ارتباط با سرور، دوباره امتحان کن';
+    errEl.classList.add('show');
+  }finally{
+    submitBtn.disabled = false;
   }
 });
 
@@ -998,16 +1018,23 @@ function closeConfirm(){
 }
 document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
 document.getElementById('confirm-delete').addEventListener('click', async () => {
-  appointments = appointments.filter(a => a.id !== pendingDeleteId);
+  const id = pendingDeleteId;
+  try{
+    const res = await fetch('/api/appointments/' + id, { method:'DELETE' });
+    if(!res.ok) throw new Error('delete failed');
+    appointments = appointments.filter(a => a.id !== id);
+    showToast('نوبت حذف شد');
+  }catch(e){
+    showToast('حذف نوبت با خطا مواجه شد');
+  }
   pendingDeleteId = null;
-  await saveAppointments();
   closeConfirm();
   closeSheet();
   backdrop.classList.remove('show');
   renderToday();
   renderCalendar();
-  showToast('نوبت حذف شد');
 });
+
 
 /* ============ Toast ============ */
 let toastTimer = null;
