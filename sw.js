@@ -1,10 +1,11 @@
-const CACHE_NAME = 'arman-cut-v2';
+const CACHE_NAME = 'arman-cut-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './badge-96.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,6 +34,18 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
         return res;
       }).catch(() => cached);
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      for(const client of clientList){
+        if('focus' in client) return client.focus();
+      }
+      if(clients.openWindow) return clients.openWindow('./');
     })
   );
 });

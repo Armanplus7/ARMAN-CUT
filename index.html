@@ -17,6 +17,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
+    color-scheme: dark;
     --bg:#15110c;
     --bg-2:#1b1611;
     --surface:#221b14;
@@ -36,7 +37,7 @@
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%;}
+  html,body{height:100%; background:var(--bg);}
   body{
     font-family:'Vazirmatn', Tahoma, sans-serif;
     background:
@@ -101,13 +102,18 @@
     overflow-y:auto;
   }
   .view{display:none;}
-  .view.active{display:block;}
+  .view.active{display:block; animation:viewIn .28s ease both;}
+  @keyframes viewIn{
+    from{opacity:0; transform:translateY(8px);}
+    to{opacity:1; transform:translateY(0);}
+  }
 
   /* Section label */
   .count-label{
     font-size:13px;
     color:var(--text-dim);
-    margin:10px 4px 14px;
+    text-align:center;
+    margin:18px 4px 4px;
   }
 
   /* ---------- Appointment card ---------- */
@@ -156,11 +162,14 @@
     min-width:0;
   }
   .done-check{
-    width:15px;height:15px;
+    width:20px;height:20px;
     color:var(--sage);
     flex-shrink:0;
   }
-  .appt-card.past{opacity:.5;}
+  .appt-name.past .name-text{
+    color:var(--text-faint);
+    font-weight:500;
+  }
   .appt-phone{
     font-size:12.5px;
     color:var(--text-dim);
@@ -218,7 +227,9 @@
     display:flex; align-items:center; justify-content:center;
     color:var(--text-dim);
     cursor:pointer;
+    transition:transform .15s, background .15s;
   }
+  .cal-nav:active{transform:scale(.88); background:var(--surface-2);}
   .cal-nav svg{width:16px;height:16px;}
   .cal-weekdays{
     display:grid;
@@ -243,6 +254,7 @@
     color:var(--text);
     border-radius:50%;
     cursor:pointer;
+    transition:background .18s, color .18s;
   }
   .cal-day.empty{cursor:default;}
   .cal-day .dot{
@@ -275,7 +287,9 @@
     border-radius:999px;
     padding:7px 14px;
     cursor:pointer;
+    transition:transform .15s;
   }
+  .add-inline-btn:active{transform:scale(.94);}
 
   /* ---------- Tab bar ---------- */
   .tabbar-wrap{
@@ -291,21 +305,24 @@
     pointer-events:auto;
     position:relative;
     width:100%;
-    max-width:280px;
+    max-width:320px;
     background:var(--surface-2);
     border:1px solid var(--border);
     border-radius:999px;
     display:flex;
+    align-items:center;
+    gap:6px;
     padding:5px;
     box-shadow:0 10px 30px rgba(0,0,0,.45);
   }
   .tabbar .pill{
     position:absolute;
     top:5px; bottom:5px;
-    width:calc(50% - 5px);
+    left:5px;
+    width:60px;
     background:var(--gold);
     border-radius:999px;
-    transition:transform .28s cubic-bezier(.65,0,.35,1);
+    transition:left .28s cubic-bezier(.65,0,.35,1), width .28s cubic-bezier(.65,0,.35,1);
     z-index:0;
   }
   .tab-btn{
@@ -320,28 +337,26 @@
     color:var(--text-dim);
     cursor:pointer;
     border-radius:999px;
-    transition:color .2s;
+    transition:color .2s, opacity .15s;
   }
   .tab-btn.active{color:#1c1610;}
-
-  /* ---------- FAB ---------- */
-  .fab{
-    position:fixed;
-    bottom:calc(92px + var(--safe-bottom));
-    left:50%;
-    transform:translateX(calc(-1 * min(50%,230px) + 34px));
-    width:54px;height:54px;
+  .tab-btn:active{opacity:.7;}
+  .tab-add{
+    flex:0 0 auto;
+    width:44px;height:44px;
     border-radius:50%;
     background:var(--gold);
     border:none;
     display:flex; align-items:center; justify-content:center;
-    box-shadow:0 8px 22px rgba(201,162,92,.35);
     cursor:pointer;
-    z-index:5;
+    position:relative;
+    z-index:2;
+    box-shadow:0 4px 14px rgba(201,162,92,.35);
     transition:transform .15s;
   }
-  .fab:active{transform:translateX(calc(-1 * min(50%,230px) + 34px)) scale(.92);}
-  .fab svg{width:24px;height:24px; color:#1c1610;}
+  .tab-add:active{transform:scale(.88);}
+  .tab-add svg{width:20px;height:20px; color:#1c1610;}
+
 
   /* ---------- Sheet / modal ---------- */
   .backdrop{
@@ -385,7 +400,7 @@
     color:var(--text-dim);
     margin-bottom:7px;
   }
-  .field input{
+  .field input, .field textarea{
     width:100%;
     background:var(--surface);
     border:1px solid var(--border);
@@ -396,8 +411,10 @@
     color:var(--text);
     outline:none;
   }
-  .field input:focus{border-color:var(--gold-dim);}
+  .field textarea{resize:vertical; min-height:56px; line-height:1.6;}
+  .field input:focus, .field textarea:focus{border-color:var(--gold-dim);}
   .field input[type="tel"]{direction:ltr; text-align:right;}
+  .optional-tag{color:var(--text-faint); font-weight:400;}
   .row3, .row2{
     display:grid;
     gap:8px;
@@ -496,6 +513,13 @@
   }
   .toast.show{transform:translate(-50%,0); opacity:1;}
   .toast svg{width:16px;height:16px; color:var(--sage); flex-shrink:0;}
+  .app-version{
+    text-align:center;
+    font-size:10px;
+    color:var(--text-faint);
+    opacity:.55;
+    margin:26px 0 4px;
+  }
 </style>
 </head>
 <body>
@@ -521,8 +545,8 @@
   <main>
     <!-- Today view -->
     <section class="view active" id="view-today">
-      <div class="count-label" id="today-count">—</div>
       <div id="today-list"></div>
+      <div class="count-label" id="today-count">—</div>
     </section>
 
     <!-- Calendar view -->
@@ -547,16 +571,17 @@
       </div>
       <div id="calendar-day-list"></div>
     </section>
-  </main>
 
-  <button class="fab" id="fab-add" aria-label="ثبت نوبت">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-  </button>
+    <div class="app-version">نسخه ۱٫۱٫۰</div>
+  </main>
 
   <div class="tabbar-wrap">
     <div class="tabbar">
       <div class="pill" id="tab-pill"></div>
       <button class="tab-btn active" id="tab-today" data-tab="today">امروز</button>
+      <button class="tab-add" id="fab-add" aria-label="ثبت نوبت">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </button>
       <button class="tab-btn" id="tab-calendar" data-tab="calendar">تقویم</button>
     </div>
   </div>
@@ -578,6 +603,11 @@
       <input type="tel" id="input-phone" autocomplete="off">
     </div>
     <div class="error-msg" id="form-error">لطفاً نام یا شماره تماس رو وارد کن</div>
+
+    <div class="field">
+      <label>توضیحات <span class="optional-tag">(اختیاری)</span></label>
+      <textarea id="input-note" rows="2"></textarea>
+    </div>
 
     <div class="field" id="date-field">
       <label>تاریخ نوبت</label>
@@ -735,7 +765,7 @@ function renderToday(){
   listEl.innerHTML = '';
 
   if(list.length===0){
-    countEl.textContent = 'نوبتی برای امروز ثبت نشده';
+    countEl.textContent = '';
     listEl.innerHTML = `
       <div class="empty-state">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/></svg>
@@ -750,7 +780,7 @@ function renderToday(){
 function buildApptCard(a){
   const div = document.createElement('div');
   const past = isPastAppt(a);
-  div.className = 'appt-card' + (past ? ' past' : '');
+  div.className = 'appt-card';
   const hasName = a.name && a.name.trim();
   const hasPhone = a.phone && a.phone.trim();
   const displayName = hasName ? a.name : (hasPhone ? a.phone : '');
@@ -762,7 +792,7 @@ function buildApptCard(a){
   div.innerHTML = `
     <div class="appt-time">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
     <div class="appt-info">
-      <div class="appt-name"${nameDirAttr}>${checkIcon}<span class="name-text">${escapeHtml(displayName)}</span></div>
+      <div class="appt-name${past ? ' past' : ''}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${checkIcon}</div>
       ${showPhoneLine ? `<div class="appt-phone">${escapeHtml(a.phone)}</div>` : ''}
     </div>`;
   div.addEventListener('click', () => openEditSheet(a));
@@ -840,13 +870,19 @@ function renderDayList(){
 }
 
 /* ============ Tabs ============ */
+function positionPill(){
+  const activeBtn = document.getElementById(activeTab === 'today' ? 'tab-today' : 'tab-calendar');
+  const pill = document.getElementById('tab-pill');
+  pill.style.left = activeBtn.offsetLeft + 'px';
+  pill.style.width = activeBtn.offsetWidth + 'px';
+}
 function setTab(tab){
   activeTab = tab;
   document.getElementById('view-today').classList.toggle('active', tab==='today');
   document.getElementById('view-calendar').classList.toggle('active', tab==='calendar');
   document.getElementById('tab-today').classList.toggle('active', tab==='today');
   document.getElementById('tab-calendar').classList.toggle('active', tab==='calendar');
-  document.getElementById('tab-pill').style.transform = tab==='today' ? 'translateX(0)' : 'translateX(-100%)';
+  positionPill();
 }
 document.getElementById('tab-today').addEventListener('click', ()=>setTab('today'));
 document.getElementById('tab-calendar').addEventListener('click', ()=>setTab('calendar'));
@@ -864,11 +900,18 @@ document.getElementById('cal-next').addEventListener('click', ()=>{
 const backdrop = document.getElementById('backdrop');
 const sheet = document.getElementById('sheet');
 
-// working-hour slots: 08:30–13:00 and 16:30–21:00, every 30 minutes
+// working-hour slots: 08:30–13:00 and 16:30–21:00, every 30 minutes (used when booking new appointments)
 const ALL_TIME_SLOTS = (() => {
   const slots = [];
   for(let m=8*60+30; m<=13*60; m+=30) slots.push(m);
   for(let m=16*60+30; m<=21*60; m+=30) slots.push(m);
+  return slots.map(m => ({ hour: Math.floor(m/60), minute: m%60 }));
+})();
+
+// wider range used only when editing an existing appointment: 08:00–22:00, every 30 minutes
+const EDIT_TIME_SLOTS = (() => {
+  const slots = [];
+  for(let m=8*60; m<=22*60; m+=30) slots.push(m);
   return slots.map(m => ({ hour: Math.floor(m/60), minute: m%60 }));
 })();
 
@@ -880,9 +923,9 @@ function populateSelects(){
   const years = [TODAY_JY-1, TODAY_JY, TODAY_JY+1];
   selYear.innerHTML = years.map(y=>`<option value="${y}">${toFa(y)}</option>`).join('');
 
-  document.getElementById('sel-month').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(); });
-  document.getElementById('sel-year').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(); });
-  document.getElementById('sel-day').addEventListener('change', () => { updateTimeOptions(); });
+  document.getElementById('sel-month').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {wide: !!editingId}); });
+  document.getElementById('sel-year').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {wide: !!editingId}); });
+  document.getElementById('sel-day').addEventListener('change', () => { updateTimeOptions(null, {wide: !!editingId}); });
 }
 function updateDayOptions(){
   const y = parseInt(document.getElementById('sel-year').value);
@@ -896,14 +939,18 @@ function updateDayOptions(){
   selDay.value = Math.min(prevVal, len);
 }
 
-function updateTimeOptions(forceSlot){
+function updateTimeOptions(forceSlot, opts){
+  opts = opts || {};
   const jy = parseInt(document.getElementById('sel-year').value);
   const jm = parseInt(document.getElementById('sel-month').value);
   const jd = parseInt(document.getElementById('sel-day').value);
   const isToday = jy===TODAY_JY && jm===TODAY_JM && jd===TODAY_JD;
   const nowMinutes = now.getHours()*60 + now.getMinutes();
 
-  let slots = ALL_TIME_SLOTS.filter(s => !isToday || (s.hour*60 + s.minute) >= nowMinutes);
+  let slots = (opts.wide ? EDIT_TIME_SLOTS : ALL_TIME_SLOTS).slice();
+  if(!opts.wide){
+    slots = slots.filter(s => !isToday || (s.hour*60 + s.minute) >= nowMinutes);
+  }
 
   if(forceSlot && !slots.some(s => s.hour===forceSlot.hour && s.minute===forceSlot.minute)){
     slots = slots.concat([forceSlot]).sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
@@ -952,6 +999,7 @@ function openAddSheet(dateCtx, showDate){
   document.getElementById('date-field').style.display = showDate ? '' : 'none';
   document.getElementById('input-name').value = '';
   document.getElementById('input-phone').value = '';
+  document.getElementById('input-note').value = '';
   document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
@@ -969,11 +1017,12 @@ function openEditSheet(appt){
   document.getElementById('date-field').style.display = '';
   document.getElementById('input-name').value = appt.name || '';
   document.getElementById('input-phone').value = appt.phone || '';
+  document.getElementById('input-note').value = appt.note || '';
   document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
   fillDateSelects(appt.jy, appt.jm, appt.jd);
-  updateTimeOptions({ hour: appt.hour, minute: appt.minute });
+  updateTimeOptions({ hour: appt.hour, minute: appt.minute }, { wide: true });
 
   openSheetUI();
 }
@@ -987,6 +1036,7 @@ document.getElementById('add-for-day').addEventListener('click', () => openAddSh
 document.getElementById('submit-appt').addEventListener('click', () => {
   const name = document.getElementById('input-name').value.trim();
   const phone = document.getElementById('input-phone').value.trim();
+  const note = document.getElementById('input-note').value.trim();
   const errEl = document.getElementById('form-error');
   const timeErrEl = document.getElementById('time-error');
   errEl.classList.remove('show');
@@ -1021,11 +1071,11 @@ document.getElementById('submit-appt').addEventListener('click', () => {
 
   if(editingId){
     const appt = appointments.find(a => a.id === editingId);
-    if(appt) Object.assign(appt, {name, phone, jy, jm, jd, hour, minute});
+    if(appt) Object.assign(appt, {name, phone, note, jy, jm, jd, hour, minute});
   } else {
     appointments.push({
       id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
-      name, phone, jy, jm, jd, hour, minute
+      name, phone, note, jy, jm, jd, hour, minute
     });
   }
 
@@ -1081,10 +1131,54 @@ function showToast(text){
   toastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
 }
 
+/* ============ Reminder notifications (while the app is open) ============ */
+const notifiedApptIds = new Set();
+
+function requestNotificationPermission(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'default'){
+    Notification.requestPermission().catch(()=>{});
+  }
+}
+
+function checkUpcomingReminders(){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  if(!('serviceWorker' in navigator)) return;
+  const nowCheck = new Date();
+  appointments.forEach(a => {
+    if(notifiedApptIds.has(a.id)) return;
+    const diffMin = (apptDateObj(a).getTime() - nowCheck.getTime()) / 60000;
+    if(diffMin > 0 && diffMin <= 5){
+      notifiedApptIds.add(a.id);
+      const who = (a.name && a.name.trim()) ? a.name : ((a.phone && a.phone.trim()) ? a.phone : 'مشتری');
+      const timeStr = toFa(pad2(a.hour)) + ':' + toFa(pad2(a.minute));
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification('یادآوری نوبت', {
+          body: `۵ دقیقه تا شروع نوبت آقای ${who} در ساعت ${timeStr}`,
+          icon: 'icon-192.png',
+          badge: 'badge-96.png',
+          tag: 'appt-' + a.id,
+          dir: 'rtl',
+          lang: 'fa'
+        }).catch(()=>{});
+      });
+    }
+  });
+}
+
 /* ============ Init ============ */
 renderHeader();
 populateSelects();
 loadAppointments();
+positionPill();
+
+requestNotificationPermission();
+document.addEventListener('click', function onFirstClick(){
+  requestNotificationPermission();
+  document.removeEventListener('click', onFirstClick);
+}, {once:true});
+checkUpcomingReminders();
+setInterval(checkUpcomingReminders, 30000);
 
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
