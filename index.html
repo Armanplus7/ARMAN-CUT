@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#15110c">
+<meta name="color-scheme" content="dark">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
@@ -154,6 +155,7 @@
     display:flex;
     align-items:center;
     gap:6px;
+    border-radius:7px;
   }
   .appt-name .name-text{
     white-space:nowrap;
@@ -166,6 +168,36 @@
     color:var(--sage);
     flex-shrink:0;
   }
+  .done-x{
+    width:20px;height:20px;
+    color:var(--danger);
+    flex-shrink:0;
+  }
+  .status-btn{
+    width:23px;height:23px;
+    border-radius:50%;
+    border:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    flex-shrink:0;
+    transition:transform .12s;
+  }
+  .status-btn:active{transform:scale(.85);}
+  .status-btn svg{width:13px;height:13px;}
+  .status-ok{background:rgba(127,154,114,.2); color:var(--sage);}
+  .status-bad{background:rgba(179,86,63,.2); color:var(--danger);}
+  @keyframes flashGreen{
+    from{box-shadow:0 0 0 2px rgba(127,154,114,.95);}
+    to{box-shadow:0 0 0 2px rgba(127,154,114,0);}
+  }
+  @keyframes flashRed{
+    from{box-shadow:0 0 0 2px rgba(179,86,63,.95);}
+    to{box-shadow:0 0 0 2px rgba(179,86,63,0);}
+  }
+  .appt-name.flash-ok{animation:flashGreen 1.3s ease-out;}
+  .appt-name.flash-bad{animation:flashRed 1.3s ease-out;}
   .appt-name.past .name-text{
     color:var(--text-faint);
     font-weight:500;
@@ -264,6 +296,7 @@
     border-radius:50%;
     background:var(--sage);
   }
+  .cal-day.friday{color:var(--danger);}
   .cal-day.today{color:var(--gold); font-weight:700;}
   .cal-day.selected{
     background:var(--gold);
@@ -279,17 +312,7 @@
     margin:22px 2px 12px;
   }
   .selected-date-row h2{font-size:15px; font-weight:600; color:var(--text);}
-  .add-inline-btn{
-    font-size:12.5px;
-    color:var(--gold);
-    background:var(--gold-glow);
-    border:1px solid var(--gold-dim);
-    border-radius:999px;
-    padding:7px 14px;
-    cursor:pointer;
-    transition:transform .15s;
-  }
-  .add-inline-btn:active{transform:scale(.94);}
+  .cal-weekdays .holiday{color:var(--danger);}
 
   /* ---------- Tab bar ---------- */
   .tabbar-wrap{
@@ -411,10 +434,9 @@
     color:var(--text);
     outline:none;
   }
-  .field textarea{resize:vertical; min-height:56px; line-height:1.6;}
+  .field textarea{resize:none; font-family:inherit;}
   .field input:focus, .field textarea:focus{border-color:var(--gold-dim);}
   .field input[type="tel"]{direction:ltr; text-align:right;}
-  .optional-tag{color:var(--text-faint); font-weight:400;}
   .row3, .row2{
     display:grid;
     gap:8px;
@@ -561,15 +583,15 @@
         </div>
       </div>
       <div class="cal-weekdays">
-        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+        <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span class="holiday">ج</span>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
 
       <div class="selected-date-row">
         <h2 id="selected-date-label">—</h2>
-        <button class="add-inline-btn" id="add-for-day">ثبت نوبت</button>
       </div>
       <div id="calendar-day-list"></div>
+      <div class="count-label" id="calendar-count"></div>
     </section>
 
     <div class="app-version">نسخه ۱٫۱٫۰</div>
@@ -604,11 +626,6 @@
     </div>
     <div class="error-msg" id="form-error">لطفاً نام یا شماره تماس رو وارد کن</div>
 
-    <div class="field">
-      <label>توضیحات <span class="optional-tag">(اختیاری)</span></label>
-      <textarea id="input-note" rows="2"></textarea>
-    </div>
-
     <div class="field" id="date-field">
       <label>تاریخ نوبت</label>
       <div class="row3">
@@ -623,6 +640,11 @@
       <select id="sel-time"></select>
     </div>
     <div class="error-msg" id="time-error">این ساعت قبلاً برای یه نفر دیگه ثبت شده</div>
+
+    <div class="field">
+      <label>توضیحات</label>
+      <textarea id="input-note" rows="1"></textarea>
+    </div>
 
     <button class="submit-btn" id="submit-appt">ثبت نوبت</button>
     <button class="delete-btn" id="sheet-delete-btn" style="display:none;">حذف نوبت</button>
@@ -754,6 +776,8 @@ function apptDateObj(a){
 function isPastAppt(a){
   return apptDateObj(a).getTime() < now.getTime();
 }
+let justResolvedId = null;
+let justResolvedType = null; // 'ok' | 'bad'
 
 function renderToday(){
   const list = appointments
@@ -786,17 +810,56 @@ function buildApptCard(a){
   const displayName = hasName ? a.name : (hasPhone ? a.phone : '');
   const showPhoneLine = hasName && hasPhone;
   const nameDirAttr = !hasName && hasPhone ? ' dir="ltr" style="text-align:right;"' : '';
-  const checkIcon = past
-    ? `<svg class="done-check" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`
-    : '';
+
+  let controlHtml = '';
+  let resolved = false;
+  if(past){
+    if(a.status === 'done'){
+      resolved = true;
+      controlHtml = `<svg class="done-check" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    } else if(a.status === 'noshow'){
+      resolved = true;
+      controlHtml = `<svg class="done-x" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`;
+    } else {
+      controlHtml = `
+        <button class="status-btn status-ok" aria-label="اوکی">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="status-btn status-bad" aria-label="نیومد">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+        </button>`;
+    }
+  }
+
+  const flashClass = justResolvedId === a.id ? (justResolvedType === 'ok' ? ' flash-ok' : ' flash-bad') : '';
+  const nameClass = 'appt-name' + (resolved ? ' past' : '') + flashClass;
+
   div.innerHTML = `
     <div class="appt-time">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
     <div class="appt-info">
-      <div class="appt-name${past ? ' past' : ''}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${checkIcon}</div>
+      <div class="${nameClass}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${controlHtml}</div>
       ${showPhoneLine ? `<div class="appt-phone">${escapeHtml(a.phone)}</div>` : ''}
     </div>`;
+
   div.addEventListener('click', () => openEditSheet(a));
+  const okBtn = div.querySelector('.status-ok');
+  const badBtn = div.querySelector('.status-bad');
+  if(okBtn) okBtn.addEventListener('click', (e) => { e.stopPropagation(); setApptStatus(a.id, 'done'); });
+  if(badBtn) badBtn.addEventListener('click', (e) => { e.stopPropagation(); setApptStatus(a.id, 'noshow'); });
   return div;
+}
+
+function setApptStatus(id, status){
+  const appt = appointments.find(x => x.id === id);
+  if(!appt) return;
+  appt.status = status;
+  persistAppointments();
+  justResolvedId = id;
+  justResolvedType = status === 'done' ? 'ok' : 'bad';
+  renderToday();
+  renderCalendar();
+  justResolvedId = null;
+  justResolvedType = null;
 }
 function escapeHtml(s){
   const d = document.createElement('div');
@@ -830,6 +893,8 @@ function renderCalendar(){
   for(let d=1; d<=monthLen; d++){
     const cell = document.createElement('div');
     let cls = 'cal-day';
+    const col = (leadingEmpty + (d-1)) % 7;
+    if(col===6) cls += ' friday';
     if(calViewYear===TODAY_JY && calViewMonth===TODAY_JM && d===TODAY_JD) cls += ' today';
     if(calViewYear===selectedDate.jy && calViewMonth===selectedDate.jm && d===selectedDate.jd) cls += ' selected';
     cell.className = cls;
@@ -859,13 +924,16 @@ function renderDayList(){
     .sort((a,b)=>apptSortKey(a)-apptSortKey(b));
 
   const listEl = document.getElementById('calendar-day-list');
+  const countEl = document.getElementById('calendar-count');
   listEl.innerHTML = '';
   if(list.length===0){
+    countEl.textContent = '';
     listEl.innerHTML = `<div class="empty-state" style="padding:24px 10px 4px;">
       <p>برای این روز نوبتی ثبت نشده</p>
     </div>`;
     return;
   }
+  countEl.textContent = toFa(list.length) + ' نوبت برای ' + (isToday ? 'امروز' : 'این روز');
   list.forEach(a => listEl.appendChild(buildApptCard(a)));
 }
 
@@ -1031,7 +1099,6 @@ document.getElementById('fab-add').addEventListener('click', () => {
   const ctx = activeTab==='calendar' ? selectedDate : {jy:TODAY_JY, jm:TODAY_JM, jd:TODAY_JD};
   openAddSheet(ctx, activeTab==='calendar');
 });
-document.getElementById('add-for-day').addEventListener('click', () => openAddSheet(selectedDate, true));
 
 document.getElementById('submit-appt').addEventListener('click', () => {
   const name = document.getElementById('input-name').value.trim();
