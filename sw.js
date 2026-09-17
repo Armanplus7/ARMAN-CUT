@@ -1,12 +1,11 @@
-const CACHE_NAME = 'arman-cut-v5';
+const CACHE_NAME = 'arman-cut-v6';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './badge-96.png',
-  './logo-mark.png'
+  './badge-96.png'
 ];
 
 self.addEventListener('install', (event) => {

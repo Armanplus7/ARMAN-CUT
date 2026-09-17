@@ -70,11 +70,6 @@
     gap:8px;
     margin-bottom:10px;
   }
-  .brand-logo{
-    height:30px;width:auto;
-    flex-shrink:0;
-    display:block;
-  }
   .brand-name{
     font-size:21px;
     font-weight:800;
@@ -154,10 +149,7 @@
     color:var(--text);
     display:flex;
     align-items:center;
-    gap:7px;
-    border-radius:8px;
-    padding:2px 5px;
-    margin:-2px -5px;
+    gap:10px;
   }
   .appt-name .name-text{
     white-space:nowrap;
@@ -166,7 +158,7 @@
     min-width:0;
   }
   .status-btn{
-    width:29px;height:29px;
+    width:34px;height:34px;
     border-radius:50%;
     border:none;
     display:flex;
@@ -177,25 +169,15 @@
     transition:transform .12s;
   }
   .status-btn:active{transform:scale(.85);}
-  .status-btn svg{width:16px;height:16px;}
+  .status-btn svg{width:17px;height:17px;}
   .status-ok{background:rgba(127,154,114,.2); color:var(--sage);}
-  .status-bad{background:rgba(179,86,63,.2); color:var(--danger);}
-  @keyframes settleGreen{
-    from{box-shadow:0 0 0 5px rgba(127,154,114,.55);}
-    to{box-shadow:0 0 0 1.5px rgba(127,154,114,.9);}
-  }
-  @keyframes settleRed{
-    from{box-shadow:0 0 0 5px rgba(179,86,63,.55);}
-    to{box-shadow:0 0 0 1.5px rgba(179,86,63,.9);}
-  }
-  .appt-name.resolved-ok{
-    box-shadow:0 0 0 1.5px rgba(127,154,114,.9);
-  }
-  .appt-name.resolved-bad{
-    box-shadow:0 0 0 1.5px rgba(179,86,63,.9);
-  }
-  .appt-name.flash-in.resolved-ok{animation:settleGreen .9s ease-out;}
-  .appt-name.flash-in.resolved-bad{animation:settleRed .9s ease-out;}
+  .status-bad{background:rgba(179,86,63,.2); color:var(--danger); margin-inline-start:5px;}
+  @keyframes colorGreenIn{ from{color:var(--text);} to{color:var(--sage);} }
+  @keyframes colorRedIn{ from{color:var(--text);} to{color:var(--danger);} }
+  .appt-time.resolved-ok{color:var(--sage);}
+  .appt-time.resolved-bad{color:var(--danger);}
+  .appt-time.flash-in.resolved-ok{animation:colorGreenIn .6s ease-out;}
+  .appt-time.flash-in.resolved-bad{animation:colorRedIn .6s ease-out;}
   .appt-name.past .name-text{
     color:var(--text-faint);
     font-weight:500;
@@ -206,6 +188,14 @@
     margin-top:3px;
     direction:ltr;
     text-align:right;
+  }
+  .appt-note{
+    font-size:11px;
+    color:var(--text-faint);
+    margin-top:3px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
   }
   .sheet-close{
     position:absolute;
@@ -435,6 +425,37 @@
   .field textarea{resize:none; font-family:inherit;}
   .field input:focus, .field textarea:focus{border-color:var(--gold-dim);}
   .field input[type="tel"]{direction:ltr; text-align:right;}
+  .companion-toggle{
+    display:flex; align-items:center; gap:6px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    color:var(--text-dim);
+    border-radius:999px;
+    padding:8px 14px;
+    font-family:inherit;
+    font-size:12.5px;
+    cursor:pointer;
+    width:fit-content;
+    margin:-8px 0 16px;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .companion-toggle svg{width:14px;height:14px;}
+  .companion-toggle.active{background:var(--gold-glow); border-color:var(--gold-dim); color:var(--gold);}
+  .status-toggle{display:flex; gap:8px;}
+  .status-opt{
+    flex:1;
+    padding:10px 0;
+    border-radius:10px;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--text-dim);
+    font-family:inherit;
+    font-size:12.5px;
+    font-weight:600;
+    cursor:pointer;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  .status-opt.active{background:var(--gold); color:#1c1610; border-color:var(--gold);}
   .row3, .row2{
     display:grid;
     gap:8px;
@@ -540,7 +561,6 @@
 
   <header>
     <div class="brand-row" dir="ltr">
-      <img class="brand-logo" src="logo-mark.png" alt="ARMAN CUT">
       <div class="brand-name"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
     </div>
     <div class="header-sub">
@@ -602,8 +622,13 @@
     <h3 id="sheet-title">ثبت نوبت جدید</h3>
     <div class="field">
       <label>نام مشتری</label>
-      <input type="text" id="input-name" autocomplete="off">
+      <input type="text" id="input-name" list="name-suggestions" autocomplete="off">
+      <datalist id="name-suggestions"></datalist>
     </div>
+    <button type="button" class="companion-toggle" id="companion-toggle" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      همراه داره (۲ نوبت پشت‌سرهم)
+    </button>
     <div class="field">
       <label>شماره تماس</label>
       <input type="tel" id="input-phone" autocomplete="off">
@@ -624,6 +649,15 @@
       <select id="sel-time"></select>
     </div>
     <div class="error-msg" id="time-error">این ساعت قبلاً برای یه نفر دیگه ثبت شده</div>
+
+    <div class="field" id="status-field" style="display:none;">
+      <label>وضعیت نوبت</label>
+      <div class="status-toggle">
+        <button type="button" class="status-opt" data-status="">در انتظار</button>
+        <button type="button" class="status-opt" data-status="done">اومد</button>
+        <button type="button" class="status-opt" data-status="noshow">نیومد</button>
+      </div>
+    </div>
 
     <div class="field">
       <label>توضیحات</label>
@@ -763,6 +797,16 @@ function isPastAppt(a){
 let justResolvedId = null;
 let justResolvedType = null; // 'ok' | 'bad'
 
+function countLabelText(list, dayLabel){
+  const done = list.filter(a => a.status === 'done').length;
+  const noshow = list.filter(a => a.status === 'noshow').length;
+  let text = toFa(list.length) + ' نوبت برای ' + dayLabel;
+  if(done || noshow){
+    text += ` (${toFa(done)} ✓ ، ${toFa(noshow)} ✗)`;
+  }
+  return text;
+}
+
 function renderToday(){
   const list = appointments
     .filter(a => a.jy===TODAY_JY && a.jm===TODAY_JM && a.jd===TODAY_JD)
@@ -781,7 +825,7 @@ function renderToday(){
       </div>`;
     return;
   }
-  countEl.textContent = toFa(list.length) + ' نوبت برای امروز';
+  countEl.textContent = countLabelText(list, 'امروز');
   list.forEach(a => listEl.appendChild(buildApptCard(a)));
 }
 
@@ -796,12 +840,15 @@ function buildApptCard(a){
   const nameDirAttr = !hasName && hasPhone ? ' dir="ltr" style="text-align:right;"' : '';
 
   let controlHtml = '';
-  let extraClass = '';
+  let nameExtraClass = '';
+  let timeExtraClass = '';
   if(past){
     if(a.status === 'done'){
-      extraClass = ' past resolved-ok';
+      nameExtraClass = ' past';
+      timeExtraClass = ' resolved-ok';
     } else if(a.status === 'noshow'){
-      extraClass = ' past resolved-bad';
+      nameExtraClass = ' past';
+      timeExtraClass = ' resolved-bad';
     } else {
       controlHtml = `
         <button class="status-btn status-ok" aria-label="اوکی">
@@ -814,13 +861,16 @@ function buildApptCard(a){
   }
 
   const flashClass = justResolvedId === a.id ? ' flash-in' : '';
-  const nameClass = 'appt-name' + extraClass + flashClass;
+  const nameClass = 'appt-name' + nameExtraClass;
+  const timeClass = 'appt-time' + timeExtraClass + flashClass;
+  const hasNote = a.note && a.note.trim();
 
   div.innerHTML = `
-    <div class="appt-time">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
+    <div class="${timeClass}">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
     <div class="appt-info">
       <div class="${nameClass}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${controlHtml}</div>
       ${showPhoneLine ? `<div class="appt-phone">${escapeHtml(a.phone)}</div>` : ''}
+      ${hasNote ? `<div class="appt-note">${escapeHtml(a.note)}</div>` : ''}
     </div>`;
 
   div.addEventListener('click', () => openEditSheet(a));
@@ -915,7 +965,7 @@ function renderDayList(){
     </div>`;
     return;
   }
-  countEl.textContent = toFa(list.length) + ' نوبت برای ' + (isToday ? 'امروز' : 'این روز');
+  countEl.textContent = countLabelText(list, isToday ? 'امروز' : 'این روز');
   list.forEach(a => listEl.appendChild(buildApptCard(a)));
 }
 
@@ -1047,6 +1097,24 @@ function fillDateSelects(jy, jm, jd){
   updateDayOptions();
   document.getElementById('sel-day').value = jd;
 }
+function refreshNameSuggestions(){
+  const names = new Set();
+  appointments.forEach(a => { if(a.name && a.name.trim()) names.add(a.name.trim()); });
+  const dl = document.getElementById('name-suggestions');
+  dl.innerHTML = Array.from(names).sort((a,b)=>a.localeCompare(b,'fa')).map(n=>`<option value="${escapeHtml(n)}"></option>`).join('');
+}
+function selectStatusOption(value){
+  document.querySelectorAll('#status-field .status-opt').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.status === value);
+  });
+}
+document.querySelectorAll('#status-field .status-opt').forEach(btn=>{
+  btn.addEventListener('click', () => selectStatusOption(btn.dataset.status));
+});
+document.getElementById('companion-toggle').addEventListener('click', function(){
+  this.classList.toggle('active');
+  this.setAttribute('aria-pressed', this.classList.contains('active') ? 'true' : 'false');
+});
 function openSheetUI(){
   backdrop.classList.add('show');
   sheet.classList.add('show');
@@ -1065,12 +1133,18 @@ function openAddSheet(dateCtx, showDate){
   document.getElementById('submit-appt').textContent = 'ثبت نوبت';
   document.getElementById('sheet-delete-btn').style.display = 'none';
   document.getElementById('date-field').style.display = showDate ? '' : 'none';
+  document.getElementById('status-field').style.display = 'none';
   document.getElementById('input-name').value = '';
   document.getElementById('input-phone').value = '';
   document.getElementById('input-note').value = '';
   document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
+  const companionBtn = document.getElementById('companion-toggle');
+  companionBtn.style.display = '';
+  companionBtn.classList.remove('active');
+  companionBtn.setAttribute('aria-pressed', 'false');
+  refreshNameSuggestions();
   fillDateSelects(dateCtx.jy, dateCtx.jm, dateCtx.jd);
   updateTimeOptions();
 
@@ -1083,12 +1157,16 @@ function openEditSheet(appt){
   document.getElementById('submit-appt').textContent = 'ذخیره تغییرات';
   document.getElementById('sheet-delete-btn').style.display = '';
   document.getElementById('date-field').style.display = '';
+  document.getElementById('status-field').style.display = '';
   document.getElementById('input-name').value = appt.name || '';
   document.getElementById('input-phone').value = appt.phone || '';
   document.getElementById('input-note').value = appt.note || '';
   document.getElementById('form-error').textContent = 'لطفاً نام یا شماره تماس رو وارد کن';
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
+  document.getElementById('companion-toggle').style.display = 'none';
+  selectStatusOption(appt.status || '');
+  refreshNameSuggestions();
   fillDateSelects(appt.jy, appt.jm, appt.jd);
   updateTimeOptions({ hour: appt.hour, minute: appt.minute }, { skipPastFilter: true });
 
@@ -1137,13 +1215,34 @@ document.getElementById('submit-appt').addEventListener('click', () => {
   }
 
   if(editingId){
+    const activeStatusBtn = document.querySelector('#status-field .status-opt.active');
+    const status = activeStatusBtn ? activeStatusBtn.dataset.status : '';
     const appt = appointments.find(a => a.id === editingId);
-    if(appt) Object.assign(appt, {name, phone, note, jy, jm, jd, hour, minute});
+    if(appt) Object.assign(appt, {name, phone, note, jy, jm, jd, hour, minute, status});
   } else {
+    const companionOn = document.getElementById('companion-toggle').classList.contains('active');
+    let secondSlot = null;
+    if(companionOn){
+      const secondMin = hour*60 + minute + 30;
+      const inRange = MORNING_SLOTS.includes(secondMin) || EVENING_SLOTS.includes(secondMin);
+      const secondTaken = appointments.some(a => a.jy===jy && a.jm===jm && a.jd===jd && (a.hour*60+a.minute)===secondMin);
+      if(!inRange || secondTaken){
+        timeErrEl.textContent = 'نوبت بعدی برای همراه در دسترس نیست؛ زمان دیگه‌ای انتخاب کن یا تیک همراه رو بردار';
+        timeErrEl.classList.add('show');
+        return;
+      }
+      secondSlot = { hour: Math.floor(secondMin/60), minute: secondMin%60 };
+    }
     appointments.push({
       id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
       name, phone, note, jy, jm, jd, hour, minute
     });
+    if(secondSlot){
+      appointments.push({
+        id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
+        name, phone, note, jy, jm, jd, hour: secondSlot.hour, minute: secondSlot.minute
+      });
+    }
   }
 
   if(!persistAppointments()) return;
