@@ -71,9 +71,9 @@
     margin-bottom:10px;
   }
   .brand-logo{
-    width:25px;height:25px;
+    height:30px;width:auto;
     flex-shrink:0;
-    color:var(--gold);
+    display:block;
   }
   .brand-name{
     font-size:21px;
@@ -154,8 +154,10 @@
     color:var(--text);
     display:flex;
     align-items:center;
-    gap:6px;
-    border-radius:7px;
+    gap:7px;
+    border-radius:8px;
+    padding:2px 5px;
+    margin:-2px -5px;
   }
   .appt-name .name-text{
     white-space:nowrap;
@@ -163,18 +165,8 @@
     text-overflow:ellipsis;
     min-width:0;
   }
-  .done-check{
-    width:20px;height:20px;
-    color:var(--sage);
-    flex-shrink:0;
-  }
-  .done-x{
-    width:20px;height:20px;
-    color:var(--danger);
-    flex-shrink:0;
-  }
   .status-btn{
-    width:23px;height:23px;
+    width:29px;height:29px;
     border-radius:50%;
     border:none;
     display:flex;
@@ -185,19 +177,25 @@
     transition:transform .12s;
   }
   .status-btn:active{transform:scale(.85);}
-  .status-btn svg{width:13px;height:13px;}
+  .status-btn svg{width:16px;height:16px;}
   .status-ok{background:rgba(127,154,114,.2); color:var(--sage);}
   .status-bad{background:rgba(179,86,63,.2); color:var(--danger);}
-  @keyframes flashGreen{
-    from{box-shadow:0 0 0 2px rgba(127,154,114,.95);}
-    to{box-shadow:0 0 0 2px rgba(127,154,114,0);}
+  @keyframes settleGreen{
+    from{box-shadow:0 0 0 5px rgba(127,154,114,.55);}
+    to{box-shadow:0 0 0 1.5px rgba(127,154,114,.9);}
   }
-  @keyframes flashRed{
-    from{box-shadow:0 0 0 2px rgba(179,86,63,.95);}
-    to{box-shadow:0 0 0 2px rgba(179,86,63,0);}
+  @keyframes settleRed{
+    from{box-shadow:0 0 0 5px rgba(179,86,63,.55);}
+    to{box-shadow:0 0 0 1.5px rgba(179,86,63,.9);}
   }
-  .appt-name.flash-ok{animation:flashGreen 1.3s ease-out;}
-  .appt-name.flash-bad{animation:flashRed 1.3s ease-out;}
+  .appt-name.resolved-ok{
+    box-shadow:0 0 0 1.5px rgba(127,154,114,.9);
+  }
+  .appt-name.resolved-bad{
+    box-shadow:0 0 0 1.5px rgba(179,86,63,.9);
+  }
+  .appt-name.flash-in.resolved-ok{animation:settleGreen .9s ease-out;}
+  .appt-name.flash-in.resolved-bad{animation:settleRed .9s ease-out;}
   .appt-name.past .name-text{
     color:var(--text-faint);
     font-weight:500;
@@ -535,13 +533,6 @@
   }
   .toast.show{transform:translate(-50%,0); opacity:1;}
   .toast svg{width:16px;height:16px; color:var(--sage); flex-shrink:0;}
-  .app-version{
-    text-align:center;
-    font-size:10px;
-    color:var(--text-faint);
-    opacity:.55;
-    margin:26px 0 4px;
-  }
 </style>
 </head>
 <body>
@@ -549,12 +540,7 @@
 
   <header>
     <div class="brand-row" dir="ltr">
-      <svg class="brand-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M5 8 L27 24" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <path d="M5 24 L27 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="7" cy="8" r="3.2" stroke="currentColor" stroke-width="2"/>
-        <circle cx="7" cy="24" r="3.2" stroke="currentColor" stroke-width="2"/>
-      </svg>
+      <img class="brand-logo" src="logo-mark.png" alt="ARMAN CUT">
       <div class="brand-name"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
     </div>
     <div class="header-sub">
@@ -593,8 +579,6 @@
       <div id="calendar-day-list"></div>
       <div class="count-label" id="calendar-count"></div>
     </section>
-
-    <div class="app-version">نسخه ۱٫۱٫۰</div>
   </main>
 
   <div class="tabbar-wrap">
@@ -812,14 +796,12 @@ function buildApptCard(a){
   const nameDirAttr = !hasName && hasPhone ? ' dir="ltr" style="text-align:right;"' : '';
 
   let controlHtml = '';
-  let resolved = false;
+  let extraClass = '';
   if(past){
     if(a.status === 'done'){
-      resolved = true;
-      controlHtml = `<svg class="done-check" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      extraClass = ' past resolved-ok';
     } else if(a.status === 'noshow'){
-      resolved = true;
-      controlHtml = `<svg class="done-x" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`;
+      extraClass = ' past resolved-bad';
     } else {
       controlHtml = `
         <button class="status-btn status-ok" aria-label="اوکی">
@@ -831,8 +813,8 @@ function buildApptCard(a){
     }
   }
 
-  const flashClass = justResolvedId === a.id ? (justResolvedType === 'ok' ? ' flash-ok' : ' flash-bad') : '';
-  const nameClass = 'appt-name' + (resolved ? ' past' : '') + flashClass;
+  const flashClass = justResolvedId === a.id ? ' flash-in' : '';
+  const nameClass = 'appt-name' + extraClass + flashClass;
 
   div.innerHTML = `
     <div class="appt-time">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
@@ -968,19 +950,16 @@ document.getElementById('cal-next').addEventListener('click', ()=>{
 const backdrop = document.getElementById('backdrop');
 const sheet = document.getElementById('sheet');
 
-// working-hour slots: 08:30–13:00 and 16:30–21:00, every 30 minutes (used when booking new appointments)
-const ALL_TIME_SLOTS = (() => {
+// working-hour slots: 08:30–13:30 and 16:00–21:30, every 30 minutes, with a break in between
+const MORNING_SLOTS = (() => {
   const slots = [];
-  for(let m=8*60+30; m<=13*60; m+=30) slots.push(m);
-  for(let m=16*60+30; m<=21*60; m+=30) slots.push(m);
-  return slots.map(m => ({ hour: Math.floor(m/60), minute: m%60 }));
+  for(let m=8*60+30; m<=13*60+30; m+=30) slots.push(m);
+  return slots;
 })();
-
-// wider range used only when editing an existing appointment: 08:00–22:00, every 30 minutes
-const EDIT_TIME_SLOTS = (() => {
+const EVENING_SLOTS = (() => {
   const slots = [];
-  for(let m=8*60; m<=22*60; m+=30) slots.push(m);
-  return slots.map(m => ({ hour: Math.floor(m/60), minute: m%60 }));
+  for(let m=16*60; m<=21*60+30; m+=30) slots.push(m);
+  return slots;
 })();
 
 function populateSelects(){
@@ -991,9 +970,9 @@ function populateSelects(){
   const years = [TODAY_JY-1, TODAY_JY, TODAY_JY+1];
   selYear.innerHTML = years.map(y=>`<option value="${y}">${toFa(y)}</option>`).join('');
 
-  document.getElementById('sel-month').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {wide: !!editingId}); });
-  document.getElementById('sel-year').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {wide: !!editingId}); });
-  document.getElementById('sel-day').addEventListener('change', () => { updateTimeOptions(null, {wide: !!editingId}); });
+  document.getElementById('sel-month').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {skipPastFilter: !!editingId}); });
+  document.getElementById('sel-year').addEventListener('change', () => { updateDayOptions(); updateTimeOptions(null, {skipPastFilter: !!editingId}); });
+  document.getElementById('sel-day').addEventListener('change', () => { updateTimeOptions(null, {skipPastFilter: !!editingId}); });
 }
 function updateDayOptions(){
   const y = parseInt(document.getElementById('sel-year').value);
@@ -1015,27 +994,48 @@ function updateTimeOptions(forceSlot, opts){
   const isToday = jy===TODAY_JY && jm===TODAY_JM && jd===TODAY_JD;
   const nowMinutes = now.getHours()*60 + now.getMinutes();
 
-  let slots = (opts.wide ? EDIT_TIME_SLOTS : ALL_TIME_SLOTS).slice();
-  if(!opts.wide){
-    slots = slots.filter(s => !isToday || (s.hour*60 + s.minute) >= nowMinutes);
+  const takenSet = new Set(
+    appointments
+      .filter(a => a.id !== editingId && a.jy===jy && a.jm===jm && a.jd===jd)
+      .map(a => a.hour*60 + a.minute)
+  );
+
+  const forceMin = forceSlot ? (forceSlot.hour*60 + forceSlot.minute) : null;
+
+  function keep(m){
+    if(m === forceMin) return true;
+    if(takenSet.has(m)) return false;
+    if(!opts.skipPastFilter && isToday && m < nowMinutes) return false;
+    return true;
   }
 
-  if(forceSlot && !slots.some(s => s.hour===forceSlot.hour && s.minute===forceSlot.minute)){
-    slots = slots.concat([forceSlot]).sort((a,b)=>(a.hour*60+a.minute)-(b.hour*60+b.minute));
+  let morning = MORNING_SLOTS.filter(keep);
+  let evening = EVENING_SLOTS.filter(keep);
+
+  if(forceMin !== null && !morning.includes(forceMin) && !evening.includes(forceMin)){
+    if(forceMin < 14*60){ morning = morning.concat([forceMin]).sort((a,b)=>a-b); }
+    else{ evening = evening.concat([forceMin]).sort((a,b)=>a-b); }
   }
 
   const sel = document.getElementById('sel-time');
-  if(slots.length===0){
-    sel.innerHTML = `<option value="">امروز زمانی باقی نمونده</option>`;
+  if(morning.length===0 && evening.length===0){
+    sel.innerHTML = `<option value="">زمانی باقی نمونده</option>`;
     return;
   }
-  sel.innerHTML = slots.map(s => {
-    const val = s.hour + ':' + s.minute;
-    const label = toFa(pad2(s.hour)) + ':' + toFa(pad2(s.minute));
-    return `<option value="${val}">${label}</option>`;
-  }).join('');
 
-  if(forceSlot) sel.value = forceSlot.hour + ':' + forceSlot.minute;
+  const optionHtml = (m) => {
+    const h = Math.floor(m/60), mi = m%60;
+    const val = h + ':' + mi;
+    const label = toFa(pad2(h)) + ':' + toFa(pad2(mi));
+    return `<option value="${val}">${label}</option>`;
+  };
+
+  let html = morning.map(optionHtml).join('');
+  if(morning.length && evening.length) html += `<option disabled>— استراحت —</option>`;
+  html += evening.map(optionHtml).join('');
+  sel.innerHTML = html;
+
+  if(forceMin !== null) sel.value = Math.floor(forceMin/60) + ':' + (forceMin%60);
 }
 
 
@@ -1090,7 +1090,7 @@ function openEditSheet(appt){
   document.getElementById('form-error').classList.remove('show');
   document.getElementById('time-error').classList.remove('show');
   fillDateSelects(appt.jy, appt.jm, appt.jd);
-  updateTimeOptions({ hour: appt.hour, minute: appt.minute }, { wide: true });
+  updateTimeOptions({ hour: appt.hour, minute: appt.minute }, { skipPastFilter: true });
 
   openSheetUI();
 }
