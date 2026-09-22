@@ -62,8 +62,54 @@
 
   /* ---------- Header ---------- */
   header{
+    position:relative;
     padding:28px 22px 18px;
   }
+  .menu-btn{
+    position:absolute;
+    top:26px; left:20px;
+    width:36px;height:36px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--surface);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-dim);
+    cursor:pointer;
+    z-index:2;
+    transition:transform .15s, background .15s;
+  }
+  .menu-btn:active{transform:scale(.9); background:var(--surface-2);}
+  .menu-btn svg{width:18px;height:18px;}
+  .menu-dropdown{
+    position:absolute;
+    top:68px; left:20px;
+    background:var(--surface-2);
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:6px;
+    min-width:170px;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+    z-index:15;
+    display:none;
+    flex-direction:column;
+    gap:2px;
+  }
+  .menu-dropdown.show{display:flex;}
+  .menu-item{
+    display:flex; align-items:center; gap:10px;
+    background:transparent;
+    border:none;
+    color:var(--text);
+    padding:11px 12px;
+    border-radius:9px;
+    font-family:inherit;
+    font-size:13.5px;
+    cursor:pointer;
+    text-align:right;
+    width:100%;
+  }
+  .menu-item:active{background:var(--surface);}
+  .menu-item svg{width:16px;height:16px; color:var(--gold); flex-shrink:0;}
   .brand-row{
     display:flex;
     align-items:center;
@@ -560,6 +606,21 @@
 <div id="app">
 
   <header>
+    <button class="menu-btn" id="menu-btn" aria-label="منو">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="menu-dropdown" id="menu-dropdown">
+      <button class="menu-item" id="menu-backup">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M8 11l4 4 4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        پشتیبان‌گیری
+      </button>
+      <button class="menu-item" id="menu-restore">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9M8 13l4-4 4 4M5 4h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        بازیابی
+      </button>
+    </div>
+    <input type="file" id="restore-file-input" accept="application/json" style="display:none;">
+
     <div class="brand-row" dir="ltr">
       <div class="brand-name"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
     </div>
@@ -633,6 +694,10 @@
       <label>شماره تماس</label>
       <input type="tel" id="input-phone" autocomplete="off">
     </div>
+    <button type="button" class="companion-toggle" id="paste-btn">
+      <svg viewBox="0 0 24 24" fill="none"><rect x="7" y="4" width="10" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M7 6H5.5A1.5 1.5 0 0 0 4 7.5v13A1.5 1.5 0 0 0 5.5 22h13a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 18.5 6H17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      جای‌گذاری از کلیپ‌بورد
+    </button>
     <div class="error-msg" id="form-error">لطفاً نام یا شماره تماس رو وارد کن</div>
 
     <div class="field" id="date-field">
@@ -751,7 +816,6 @@ let activeTab = 'today';
 let calViewYear = TODAY_JY;
 let calViewMonth = TODAY_JM;
 let selectedDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
-let pendingDeleteId = null;
 let sheetContextDate = { jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD };
 
 /* ============ Data loading (local device storage) ============ */
@@ -807,6 +871,19 @@ function countLabelText(list, dayLabel){
   return text;
 }
 
+let didAutoScroll = false;
+function autoScrollToUpcoming(){
+  if(didAutoScroll) return;
+  didAutoScroll = true;
+  const list = appointments
+    .filter(a => a.jy===TODAY_JY && a.jm===TODAY_JM && a.jd===TODAY_JD)
+    .sort((a,b)=>apptSortKey(a)-apptSortKey(b));
+  const upcoming = list.find(a => !isPastAppt(a));
+  if(!upcoming) return;
+  const card = document.querySelector(`.appt-card[data-appt-id="${upcoming.id}"]`);
+  if(card) card.scrollIntoView({ block: 'center', behavior: 'auto' });
+}
+
 function renderToday(){
   const list = appointments
     .filter(a => a.jy===TODAY_JY && a.jm===TODAY_JM && a.jd===TODAY_JD)
@@ -833,6 +910,7 @@ function buildApptCard(a){
   const div = document.createElement('div');
   const past = isPastAppt(a);
   div.className = 'appt-card';
+  div.dataset.apptId = a.id;
   const hasName = a.name && a.name.trim();
   const hasPhone = a.phone && a.phone.trim();
   const displayName = hasName ? a.name : (hasPhone ? a.phone : '');
@@ -1115,6 +1193,48 @@ document.getElementById('companion-toggle').addEventListener('click', function()
   this.classList.toggle('active');
   this.setAttribute('aria-pressed', this.classList.contains('active') ? 'true' : 'false');
 });
+
+function parseSharedContact(text){
+  text = (text || '').trim();
+  const phoneMatch = text.match(/(\+?\d[\d\s\-]{7,}\d)/);
+  let phone = '', name = text;
+  if(phoneMatch){
+    phone = phoneMatch[0].replace(/[\s\-]/g, '');
+    name = (text.slice(0, phoneMatch.index) + ' ' + text.slice(phoneMatch.index + phoneMatch[0].length))
+      .replace(/[,:؛;]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+  return { name, phone };
+}
+
+document.getElementById('paste-btn').addEventListener('click', async () => {
+  try{
+    const text = await navigator.clipboard.readText();
+    if(!text || !text.trim()){ showToast('کلیپ‌بورد خالیه'); return; }
+    const parsed = parseSharedContact(text);
+    const nameInput = document.getElementById('input-name');
+    const phoneInput = document.getElementById('input-phone');
+    if(parsed.phone && !phoneInput.value.trim()) phoneInput.value = parsed.phone;
+    if(parsed.name && !nameInput.value.trim()) nameInput.value = parsed.name;
+    showToast('از کلیپ‌بورد جای‌گذاری شد، بررسی کن');
+  }catch(e){
+    showToast('اجازه دسترسی به کلیپ‌بورد داده نشد');
+  }
+});
+
+function checkSharedContact(){
+  const params = new URLSearchParams(location.search);
+  const sharedText = [params.get('shared_text'), params.get('shared_title')].filter(Boolean).join(' ').trim();
+  if(!sharedText) return;
+  history.replaceState({}, '', location.pathname);
+  const parsed = parseSharedContact(sharedText);
+  openAddSheet({ jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD }, false);
+  document.getElementById('input-name').value = parsed.name;
+  document.getElementById('input-phone').value = parsed.phone;
+  showToast('اطلاعات از اشتراک‌گذاری پر شد، بررسی کن');
+}
+
 function openSheetUI(){
   backdrop.classList.add('show');
   sheet.classList.add('show');
@@ -1258,13 +1378,13 @@ document.getElementById('sheet-delete-btn').addEventListener('click', () => {
   if(appt) openDeleteConfirm(appt);
 });
 
-/* ============ Delete confirm ============ */
+/* ============ Generic confirm modal ============ */
 const confirmBox = document.getElementById('confirm-box');
-function openDeleteConfirm(a){
-  pendingDeleteId = a.id;
-  const who = (a.name && a.name.trim()) ? a.name : a.phone;
-  document.getElementById('confirm-text').textContent =
-    `نوبت ${who} ساعت ${toFa(pad2(a.hour))}:${toFa(pad2(a.minute))} حذف بشه؟`;
+let confirmActionFn = null;
+function openConfirm(text, confirmLabel, actionFn){
+  confirmActionFn = actionFn;
+  document.getElementById('confirm-text').textContent = text;
+  document.getElementById('confirm-delete').textContent = confirmLabel;
   backdrop.classList.add('show');
   confirmBox.classList.add('show');
 }
@@ -1272,19 +1392,30 @@ function closeConfirm(){
   confirmBox.classList.remove('show');
   if(!sheet.classList.contains('show')) backdrop.classList.remove('show');
 }
-document.getElementById('confirm-cancel').addEventListener('click', closeConfirm);
+document.getElementById('confirm-cancel').addEventListener('click', () => { confirmActionFn = null; closeConfirm(); });
 document.getElementById('confirm-delete').addEventListener('click', () => {
-  const id = pendingDeleteId;
-  appointments = appointments.filter(a => a.id !== id);
-  persistAppointments();
-  showToast('نوبت حذف شد');
-  pendingDeleteId = null;
+  const fn = confirmActionFn;
+  confirmActionFn = null;
   closeConfirm();
-  closeSheet();
-  backdrop.classList.remove('show');
-  renderToday();
-  renderCalendar();
+  if(fn) fn();
 });
+
+function openDeleteConfirm(a){
+  const who = (a.name && a.name.trim()) ? a.name : a.phone;
+  openConfirm(
+    `نوبت ${who} ساعت ${toFa(pad2(a.hour))}:${toFa(pad2(a.minute))} حذف بشه؟`,
+    'حذف نوبت',
+    () => {
+      appointments = appointments.filter(x => x.id !== a.id);
+      persistAppointments();
+      showToast('نوبت حذف شد');
+      closeSheet();
+      backdrop.classList.remove('show');
+      renderToday();
+      renderCalendar();
+    }
+  );
+}
 
 
 /* ============ Toast ============ */
@@ -1332,11 +1463,83 @@ function checkUpcomingReminders(){
   });
 }
 
+/* ============ Menu: backup / restore ============ */
+document.getElementById('menu-btn').addEventListener('click', (e) => {
+  e.stopPropagation();
+  document.getElementById('menu-dropdown').classList.toggle('show');
+});
+document.addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+});
+document.getElementById('menu-dropdown').addEventListener('click', (e) => e.stopPropagation());
+
+document.getElementById('menu-backup').addEventListener('click', async () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+  const data = JSON.stringify(appointments, null, 2);
+  const filename = `arman-cut-backup-${TODAY_JY}-${pad2(TODAY_JM)}-${pad2(TODAY_JD)}.json`;
+
+  if('showSaveFilePicker' in window){
+    try{
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{ description: 'JSON Backup', accept: { 'application/json': ['.json'] } }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(data);
+      await writable.close();
+      showToast('پشتیبان ذخیره شد');
+      return;
+    }catch(e){
+      if(e && e.name === 'AbortError') return;
+      // otherwise fall through to the download fallback below
+    }
+  }
+
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('فایل پشتیبان دانلود شد');
+});
+
+document.getElementById('menu-restore').addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+  document.getElementById('restore-file-input').click();
+});
+document.getElementById('restore-file-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try{ parsed = JSON.parse(reader.result); }
+    catch(err){ showToast('فایل معتبر نیست'); return; }
+    if(!Array.isArray(parsed)){ showToast('فایل معتبر نیست'); return; }
+    openConfirm(
+      'بازیابی از این فایل، همه‌ی نوبت‌های فعلی رو جایگزین می‌کنه. مطمئنی؟',
+      'بازیابی',
+      () => {
+        appointments = parsed;
+        if(!persistAppointments()) return;
+        showToast('بازیابی انجام شد');
+        renderToday();
+        renderCalendar();
+      }
+    );
+  };
+  reader.readAsText(file);
+});
+
 /* ============ Init ============ */
 renderHeader();
 populateSelects();
 loadAppointments();
 positionPill();
+checkSharedContact();
+setTimeout(autoScrollToUpcoming, 150);
 
 requestNotificationPermission();
 document.addEventListener('click', function onFirstClick(){
