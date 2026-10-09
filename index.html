@@ -600,6 +600,16 @@
   }
   .toast.show{transform:translate(-50%,0); opacity:1;}
   .toast svg{width:16px;height:16px; color:var(--sage); flex-shrink:0;}
+  .sync-dot{position:absolute; top:-2px; left:-2px; width:10px; height:10px; border-radius:50%; background:var(--text-dim); border:2px solid var(--bg); display:none;}
+  .sync-dot.s-synced{display:block; background:#7fb08a;}
+  .sync-dot.s-pending,.sync-dot.s-syncing{display:block; background:var(--gold);}
+  .sync-dot.s-offline{display:block; background:#8a8478;}
+  .sync-dot.s-error,.sync-dot.s-reauth{display:block; background:#d9534f;}
+  .menu-btn{overflow:visible;}
+  .menu-status{padding:8px 12px 6px; font-size:11.5px; color:var(--text-dim); line-height:1.7; border-bottom:1px solid var(--border); margin-bottom:4px; max-width:230px;}
+  .menu-status b{color:var(--text); font-weight:600; direction:ltr; unicode-bidi:plaintext; word-break:break-all;}
+  .menu-item.hidden{display:none;}
+  #login-sheet .field input{direction:ltr; text-align:left;}
 </style>
 </head>
 <body>
@@ -608,8 +618,22 @@
   <header>
     <button class="menu-btn" id="menu-btn" aria-label="منو">
       <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <span class="sync-dot" id="sync-dot"></span>
     </button>
     <div class="menu-dropdown" id="menu-dropdown">
+      <div class="menu-status" id="menu-status"></div>
+      <button class="menu-item hidden" id="menu-login">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        ورود به حساب آنلاین
+      </button>
+      <button class="menu-item hidden" id="menu-sync">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        همگام‌سازی الان
+      </button>
+      <button class="menu-item hidden" id="menu-logout">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M10 5H6v14h4M14 8l4 4-4 4M18 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        خروج از حساب
+      </button>
       <button class="menu-item" id="menu-backup">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M8 11l4 4 4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         پشتیبان‌گیری
@@ -733,6 +757,25 @@
     <button class="delete-btn" id="sheet-delete-btn" style="display:none;">حذف نوبت</button>
   </div>
 
+  <!-- Login sheet -->
+  <div class="sheet" id="login-sheet">
+    <button class="sheet-close" id="login-close" aria-label="بستن">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <div class="sheet-handle"></div>
+    <h3>ورود به حساب آنلاین</h3>
+    <div class="field">
+      <label>ایمیل</label>
+      <input type="email" id="login-email" autocomplete="username" autocapitalize="none">
+    </div>
+    <div class="field">
+      <label>رمز عبور</label>
+      <input type="password" id="login-pass" autocomplete="current-password">
+    </div>
+    <div class="error-msg" id="login-error"></div>
+    <button class="submit-btn" id="login-submit">ورود</button>
+  </div>
+
   <!-- Delete confirm -->
   <div class="confirm-box" id="confirm-box">
     <p id="confirm-text">این نوبت حذف بشه؟</p>
@@ -749,6 +792,8 @@
 
 </div>
 
+<script src="config.js"></script>
+<script src="sync.js"></script>
 <script>
 /* ============ Jalali calendar conversion ============ */
 function gregorianToJalali(gy, gm, gd) {
@@ -825,6 +870,7 @@ function loadAppointments(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     appointments = raw ? JSON.parse(raw) : [];
+    if(!Array.isArray(appointments)) appointments = [];
   }catch(e){
     appointments = [];
   }
@@ -832,6 +878,7 @@ function loadAppointments(){
   renderCalendar();
 }
 function persistAppointments(){
+  try{ if(sync) sync.noteLocalChange(); }catch(e){}
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments));
     return true;
@@ -1243,7 +1290,7 @@ function closeSheet(){
   backdrop.classList.remove('show');
   sheet.classList.remove('show');
 }
-backdrop.addEventListener('click', () => { closeSheet(); closeConfirm(); });
+backdrop.addEventListener('click', () => { closeSheet(); closeConfirm(); closeLogin(); });
 document.getElementById('sheet-close').addEventListener('click', closeSheet);
 
 function openAddSheet(dateCtx, showDate){
@@ -1390,7 +1437,7 @@ function openConfirm(text, confirmLabel, actionFn){
 }
 function closeConfirm(){
   confirmBox.classList.remove('show');
-  if(!sheet.classList.contains('show')) backdrop.classList.remove('show');
+  if(!sheet.classList.contains('show') && !loginSheet.classList.contains('show')) backdrop.classList.remove('show');
 }
 document.getElementById('confirm-cancel').addEventListener('click', () => { confirmActionFn = null; closeConfirm(); });
 document.getElementById('confirm-delete').addEventListener('click', () => {
@@ -1518,6 +1565,15 @@ document.getElementById('restore-file-input').addEventListener('change', (e) => 
     try{ parsed = JSON.parse(reader.result); }
     catch(err){ showToast('فایل معتبر نیست'); return; }
     if(!Array.isArray(parsed)){ showToast('فایل معتبر نیست'); return; }
+    const seenIds = new Set();
+    parsed = parsed.filter(a => a && [a.jy,a.jm,a.jd,a.hour,a.minute].every(Number.isInteger)).map(a => {
+      let id = a.id != null ? String(a.id) : '';
+      if(!id || seenIds.has(id)) id = 'a' + Date.now().toString(36) + Math.random().toString(36).slice(2,8);
+      seenIds.add(id);
+      return { id, name: String(a.name||''), phone: String(a.phone||''), note: String(a.note||''),
+        status: (a.status==='done'||a.status==='noshow') ? a.status : '',
+        jy:a.jy, jm:a.jm, jd:a.jd, hour:a.hour, minute:a.minute, updatedAt: Number(a.updatedAt)||0 };
+    });
     openConfirm(
       'بازیابی از این فایل، همه‌ی نوبت‌های فعلی رو جایگزین می‌کنه. مطمئنی؟',
       'بازیابی',
@@ -1533,10 +1589,110 @@ document.getElementById('restore-file-input').addEventListener('change', (e) => 
   reader.readAsText(file);
 });
 
+/* ============ Online sync (Supabase) ============ */
+const loginSheet = document.getElementById('login-sheet');
+function openLogin(){
+  const st = sync ? sync.getState() : {};
+  document.getElementById('login-email').value = st.email || '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('login-error').classList.remove('show');
+  backdrop.classList.add('show');
+  loginSheet.classList.add('show');
+}
+function closeLogin(){
+  loginSheet.classList.remove('show');
+  if(!sheet.classList.contains('show') && !confirmBox.classList.contains('show')) backdrop.classList.remove('show');
+}
+document.getElementById('login-close').addEventListener('click', closeLogin);
+document.getElementById('login-submit').addEventListener('click', async () => {
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('login-submit');
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  err.classList.remove('show');
+  if(!email || !pass){ err.textContent = 'ایمیل و رمز عبور را وارد کن'; err.classList.add('show'); return; }
+  btn.disabled = true; btn.textContent = 'در حال ورود…';
+  try{
+    await sync.signIn(email, pass);
+    closeLogin();
+    showToast('وارد شدی؛ همگام‌سازی شروع شد');
+  }catch(e){
+    err.textContent = e.message || 'ورود انجام نشد'; err.classList.add('show');
+  }finally{
+    btn.disabled = false; btn.textContent = 'ورود';
+  }
+});
+document.getElementById('login-pass').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') document.getElementById('login-submit').click();
+});
+
+const STATUS_TEXT = {
+  unconfigured:'آنلاین نشده (config.js پر نشده)', loggedout:'وارد حساب آنلاین نشدی', syncing:'در حال همگام‌سازی…',
+  offline:'آفلاین — روی گوشی ذخیره شد', error:'مشکل در همگام‌سازی', pending:'منتظر ارسال به سرور',
+  synced:'همگام است ✓', reauth:'نشست تمام شد؛ دوباره وارد شو'
+};
+function fmtAgo(ts){
+  if(!ts) return '';
+  const m = Math.round((Date.now()-ts)/60000);
+  if(m < 1) return 'همین الان';
+  if(m < 60) return m.toLocaleString('fa-IR') + ' دقیقه پیش';
+  const h = Math.round(m/60);
+  if(h < 24) return h.toLocaleString('fa-IR') + ' ساعت پیش';
+  return Math.round(h/24).toLocaleString('fa-IR') + ' روز پیش';
+}
+function renderSyncUI(st){
+  if(!st) return;
+  const dot = document.getElementById('sync-dot');
+  dot.className = 'sync-dot' + (st.configured ? ' s-' + st.status : '');
+  const el = document.getElementById('menu-status');
+  if(!st.configured){ el.style.display = 'none'; }
+  else {
+    el.style.display = '';
+    let h = STATUS_TEXT[st.status] || '';
+    if(st.message && st.status === 'error') h = st.message;
+    if(st.pendingCount) h += ' (' + st.pendingCount.toLocaleString('fa-IR') + ' تغییر در صف)';
+    if(st.loggedIn && st.email) h += '<br><b>' + st.email.replace(/[<>&]/g,'') + '</b>';
+    if(st.loggedIn && st.lastSyncAt) h += '<br>آخرین همگام‌سازی: ' + fmtAgo(st.lastSyncAt);
+    el.innerHTML = h;
+  }
+  document.getElementById('menu-login').classList.toggle('hidden', !st.configured || st.loggedIn);
+  document.getElementById('menu-sync').classList.toggle('hidden', !st.loggedIn);
+  document.getElementById('menu-logout').classList.toggle('hidden', !st.loggedIn);
+}
+document.getElementById('menu-login').addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show'); openLogin();
+});
+document.getElementById('menu-sync').addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+  if(sync) sync.syncNow().then(() => { const s = sync.getState(); if(s.status === 'synced') showToast('همگام‌سازی شد'); });
+});
+document.getElementById('menu-logout').addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+  openConfirm('از حساب آنلاین خارج بشی؟ نوبت‌ها روی گوشی می‌مونن، فقط همگام‌سازی متوقف می‌شه.', 'خروج', () => { sync.signOut(); });
+});
+document.getElementById('menu-btn').addEventListener('click', () => { if(sync) renderSyncUI(sync.getState()); });
+
+let sync = null;
+try{
+  if(window.ArmanSync){
+    const C = window.ARMAN_CONFIG || {};
+    sync = ArmanSync.create({
+      config: { url: C.SUPABASE_URL, key: C.SUPABASE_ANON_KEY },
+      storage: localStorage,
+      getRecords: () => appointments,
+      setRecords: (list) => { appointments = list; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments)); }catch(e){} },
+      saveRecords: () => { try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments)); }catch(e){} },
+      onChange: () => { renderToday(); renderCalendar(); if(typeof renderDayList === 'function') renderDayList(); },
+      onStatus: renderSyncUI
+    });
+  }
+}catch(e){ sync = null; }
+
 /* ============ Init ============ */
 renderHeader();
 populateSelects();
 loadAppointments();
+if(sync){ sync.start(); renderSyncUI(sync.getState()); }
 positionPill();
 checkSharedContact();
 setTimeout(autoScrollToUpcoming, 150);
