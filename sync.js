@@ -156,7 +156,9 @@
     /* ---------- http ---------- */
     async function http(method, path, o) {
       o = o || {};
-      var headers = { apikey: apiKey, Authorization: 'Bearer ' + (o.token || apiKey) };
+      var headers = { apikey: apiKey };
+      if (o.token) headers.Authorization = 'Bearer ' + o.token;
+      else if (/^eyJ/.test(apiKey)) headers.Authorization = 'Bearer ' + apiKey;
       if (o.json !== undefined || o.body !== undefined) headers['Content-Type'] = 'application/json';
       if (o.headers) for (var k in o.headers) headers[k] = o.headers[k];
       var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
