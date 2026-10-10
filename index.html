@@ -7,7 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#15110c">
+<meta name="theme-color" id="meta-theme" content="#15110c">
+<script>try{var __t=localStorage.getItem("arman_cut_theme");if(__t)document.documentElement.setAttribute("data-theme",__t);}catch(e){}</script>
 <meta name="color-scheme" content="dark">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -35,17 +36,45 @@
     --danger:#b3563f;
     --radius-card:14px;
     --radius-sheet:22px;
+    --on-accent:#1c1610;
+    --accent-shadow:rgba(201,162,92,.35);
+    --backdrop:rgba(10,8,6,.6);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
+  html[data-theme="redwhite"]{color-scheme:light;
+    --bg:#fbf6f4; --bg-2:#ffffff; --surface:#f5ecea; --surface-2:#ffffff; --border:#e8d9d5;
+    --gold:#d62839; --gold-dim:#e58a93; --gold-glow:rgba(214,40,57,.10); --rust:#b3563f;
+    --text:#2b1b1b; --text-dim:#7a6462; --text-faint:#b09c99; --sage:#2f8f55; --danger:#9b1c1c;
+    --on-accent:#ffffff; --accent-shadow:rgba(214,40,57,.35); --backdrop:rgba(40,20,20,.35);}
+  html[data-theme="emerald"]{color-scheme:dark;
+    --bg:#0b1512; --bg-2:#101d19; --surface:#15251f; --surface-2:#1b2f27; --border:#26413a;
+    --gold:#34d399; --gold-dim:#1f8f68; --gold-glow:rgba(52,211,153,.14); --rust:#d08a4e;
+    --text:#e8f5f0; --text-dim:#8fb3a7; --text-faint:#587468; --sage:#7fd1a0; --danger:#e0584f;
+    --on-accent:#06261b; --accent-shadow:rgba(52,211,153,.30); --backdrop:rgba(2,10,8,.65);}
+  html[data-theme="navy"]{color-scheme:dark;
+    --bg:#0c1220; --bg-2:#111a2e; --surface:#172238; --surface-2:#1e2b47; --border:#2a3a5c;
+    --gold:#ff8a3d; --gold-dim:#b3622b; --gold-glow:rgba(255,138,61,.14); --rust:#d9674a;
+    --text:#eef2fb; --text-dim:#8fa0c4; --text-faint:#5a6a8c; --sage:#6fcf97; --danger:#e5534b;
+    --on-accent:#2a1300; --accent-shadow:rgba(255,138,61,.32); --backdrop:rgba(4,8,18,.65);}
+  html[data-theme="bluewhite"]{color-scheme:light;
+    --bg:#f4f7fc; --bg-2:#ffffff; --surface:#eaf0fa; --surface-2:#ffffff; --border:#d5dff0;
+    --gold:#2563eb; --gold-dim:#7fa2ee; --gold-glow:rgba(37,99,235,.10); --rust:#c2603f;
+    --text:#14213d; --text-dim:#5c6b8a; --text-faint:#9aa7c2; --sage:#2a8f62; --danger:#d64545;
+    --on-accent:#ffffff; --accent-shadow:rgba(37,99,235,.35); --backdrop:rgba(15,25,50,.35);}
+  html[data-theme="violet"]{color-scheme:dark;
+    --bg:#130f1f; --bg-2:#1a1428; --surface:#221a33; --surface-2:#2b2140; --border:#3b2d57;
+    --gold:#c084fc; --gold-dim:#7e57b0; --gold-glow:rgba(192,132,252,.15); --rust:#e08aa8;
+    --text:#f3ecfb; --text-dim:#a898c4; --text-faint:#6e5f8c; --sage:#7fd1a0; --danger:#f0647a;
+    --on-accent:#230b3a; --accent-shadow:rgba(192,132,252,.32); --backdrop:rgba(8,4,16,.65);}
   *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{height:100%; background:var(--bg);}
+  html,body{height:100%; background:var(--bg); overflow:hidden;}
   body{
     font-family:'Vazirmatn', Tahoma, sans-serif;
     background:
       radial-gradient(600px 300px at 50% -60px, var(--gold-glow), transparent 70%),
       var(--bg);
     color:var(--text);
-    min-height:100vh;
+    height:100vh; height:100dvh;
     display:flex;
     justify-content:center;
     -webkit-font-smoothing:antialiased;
@@ -53,7 +82,7 @@
   #app{
     width:100%;
     max-width:460px;
-    min-height:100vh;
+    height:100vh; height:100dvh;
     display:flex;
     flex-direction:column;
     position:relative;
@@ -63,7 +92,9 @@
   /* ---------- Header ---------- */
   header{
     position:relative;
-    padding:28px 22px 18px;
+    flex:none;
+    z-index:5;
+    padding:28px 22px 14px;
   }
   .menu-btn{
     position:absolute;
@@ -140,8 +171,12 @@
   /* ---------- Main content ---------- */
   main{
     flex:1;
-    padding:4px 18px calc(140px + var(--safe-bottom));
+    min-height:0;
+    padding:10px 18px calc(140px + var(--safe-bottom));
     overflow-y:auto;
+    overscroll-behavior:contain;
+    -webkit-mask-image:linear-gradient(to bottom, transparent 0, #000 22px, #000 calc(100% - 118px), transparent calc(100% - 76px));
+    mask-image:linear-gradient(to bottom, transparent 0, #000 22px, #000 calc(100% - 118px), transparent calc(100% - 76px));
   }
   .view{display:none;}
   .view.active{display:block; animation:viewIn .28s ease both;}
@@ -334,10 +369,10 @@
   .cal-day.today{color:var(--gold); font-weight:700;}
   .cal-day.selected{
     background:var(--gold);
-    color:#1c1610;
+    color:var(--on-accent);
     font-weight:700;
   }
-  .cal-day.selected .dot{background:#1c1610;}
+  .cal-day.selected .dot{background:var(--on-accent);}
 
   .selected-date-row{
     display:flex;
@@ -396,7 +431,7 @@
     border-radius:999px;
     transition:color .2s, opacity .15s;
   }
-  .tab-btn.active{color:#1c1610;}
+  .tab-btn.active{color:var(--on-accent);}
   .tab-btn:active{opacity:.7;}
   .tab-add{
     flex:0 0 auto;
@@ -408,17 +443,17 @@
     cursor:pointer;
     position:relative;
     z-index:2;
-    box-shadow:0 4px 14px rgba(201,162,92,.35);
+    box-shadow:0 4px 14px var(--accent-shadow);
     transition:transform .15s;
   }
   .tab-add:active{transform:scale(.88);}
-  .tab-add svg{width:20px;height:20px; color:#1c1610;}
+  .tab-add svg{width:20px;height:20px; color:var(--on-accent);}
 
 
   /* ---------- Sheet / modal ---------- */
   .backdrop{
     position:fixed; inset:0;
-    background:rgba(10,8,6,.6);
+    background:var(--backdrop);
     backdrop-filter:blur(2px);
     opacity:0;
     pointer-events:none;
@@ -439,18 +474,19 @@
     padding:10px 22px calc(26px + var(--safe-bottom));
     transition:transform .3s cubic-bezier(.32,.72,0,1);
     z-index:11;
-    max-height:88vh;
+    max-height:94vh; max-height:94dvh;
     overflow-y:auto;
+    overscroll-behavior:contain;
   }
   .sheet.show{transform:translate(-50%, 0);}
   .sheet-handle{
     width:38px; height:4px;
     background:var(--border);
     border-radius:99px;
-    margin:6px auto 18px;
+    margin:4px auto 12px;
   }
-  .sheet h3{font-size:17px; font-weight:700; margin-bottom:20px;}
-  .field{margin-bottom:16px;}
+  .sheet h3{font-size:17px; font-weight:700; margin-bottom:14px;}
+  .field{margin-bottom:12px;}
   .field label{
     display:block;
     font-size:12.5px;
@@ -501,7 +537,7 @@
     cursor:pointer;
     transition:background .15s, color .15s, border-color .15s;
   }
-  .status-opt.active{background:var(--gold); color:#1c1610; border-color:var(--gold);}
+  .status-opt.active{background:var(--gold); color:var(--on-accent); border-color:var(--gold);}
   .row3, .row2{
     display:grid;
     gap:8px;
@@ -526,7 +562,7 @@
   .submit-btn{
     width:100%;
     background:var(--gold);
-    color:#1c1610;
+    color:var(--on-accent);
     border:none;
     border-radius:999px;
     padding:15px 0;
@@ -610,6 +646,54 @@
   .menu-status b{color:var(--text); font-weight:600; direction:ltr; unicode-bidi:plaintext; word-break:break-all;}
   .menu-item.hidden{display:none;}
   #login-sheet .field input{direction:ltr; text-align:left;}
+  .sheet-trash{
+    position:absolute; top:14px; left:54px;
+    width:30px;height:30px; border-radius:50%;
+    background:var(--surface); border:1px solid var(--border);
+    color:var(--danger);
+    display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .sheet-trash svg{width:15px;height:15px;}
+  .input-wrap{position:relative;}
+  .input-wrap input{padding-left:52px;}
+  .hist-btn{
+    position:absolute; left:6px; top:50%; transform:translateY(-50%);
+    display:none; align-items:center; gap:3px;
+    height:32px; padding:0 9px; border-radius:99px;
+    background:var(--gold-glow); border:1px solid var(--gold-dim);
+    color:var(--gold); cursor:pointer; font-family:inherit; font-size:12px; font-weight:700;
+  }
+  .hist-btn.show{display:flex;}
+  .hist-btn svg{width:16px;height:16px;}
+  .hist-summary{font-size:12.5px; color:var(--text-dim); margin:-6px 0 12px;}
+  .hist-list{display:flex; flex-direction:column; gap:8px;}
+  .hist-row{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
+  .hist-top{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+  .hist-date{font-size:13.5px; font-weight:600; color:var(--text);}
+  .hist-time{font-size:12px; color:var(--text-dim); margin-top:2px;}
+  .hist-chip{font-size:11px; padding:3px 9px; border-radius:99px; white-space:nowrap; background:var(--surface-2); color:var(--text-dim);}
+  .hist-chip.ok{background:rgba(127,154,114,.2); color:var(--sage);}
+  .hist-chip.bad{background:rgba(179,86,63,.2); color:var(--danger);}
+  .hist-chip.future{background:var(--gold-glow); color:var(--gold);}
+  .hist-note{font-size:12px; color:var(--text-faint); margin-top:6px; line-height:1.7;}
+  .set-title{font-size:12px; color:var(--text-dim); margin:16px 2px 8px;}
+  .set-title:first-of-type{margin-top:0;}
+  .set-account{font-size:12.5px; color:var(--text-dim); line-height:1.9; margin:0 2px 8px;}
+  .set-account b{color:var(--text); font-weight:600; direction:ltr; unicode-bidi:plaintext; word-break:break-all;}
+  .set-list .menu-item{background:var(--surface); border:1px solid var(--border); padding:13px 14px; margin-bottom:8px; border-radius:12px; font-size:14px;}
+  .set-list .menu-item .set-current{margin-inline-start:auto; font-size:12px; color:var(--text-dim);}
+  .theme-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .theme-card{
+    background:var(--surface); border:2px solid var(--border); border-radius:14px;
+    padding:8px; cursor:pointer; font-family:inherit; color:var(--text); text-align:center;
+    display:flex; flex-direction:column; gap:7px;
+  }
+  .theme-card.active{border-color:var(--gold);}
+  .theme-prev{height:62px; border-radius:9px; padding:8px; display:flex; flex-direction:column; gap:5px; border:1px solid rgba(128,128,128,.25);}
+  .theme-prev i{display:block; height:9px; border-radius:5px;}
+  .theme-prev .r{display:flex; gap:5px; align-items:center;}
+  .theme-prev .r i:first-child{width:18px; height:18px; border-radius:50%;}
+  .theme-name{font-size:12.5px; font-weight:600;}
 </style>
 </head>
 <body>
@@ -622,25 +706,9 @@
     </button>
     <div class="menu-dropdown" id="menu-dropdown">
       <div class="menu-status" id="menu-status"></div>
-      <button class="menu-item hidden" id="menu-login">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        ورود به حساب آنلاین
-      </button>
-      <button class="menu-item hidden" id="menu-sync">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        همگام‌سازی الان
-      </button>
-      <button class="menu-item hidden" id="menu-logout">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M10 5H6v14h4M14 8l4 4-4 4M18 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        خروج از حساب
-      </button>
-      <button class="menu-item" id="menu-backup">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M8 11l4 4 4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        پشتیبان‌گیری
-      </button>
-      <button class="menu-item" id="menu-restore">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9M8 13l4-4 4 4M5 4h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        بازیابی
+      <button class="menu-item" id="menu-settings">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        تنظیمات
       </button>
     </div>
     <input type="file" id="restore-file-input" accept="application/json" style="display:none;">
@@ -703,11 +771,20 @@
     <button class="sheet-close" id="sheet-close" aria-label="بستن">
       <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </button>
+    <button class="sheet-trash" id="sheet-delete-btn" style="display:none;" aria-label="حذف نوبت">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
     <div class="sheet-handle"></div>
     <h3 id="sheet-title">ثبت نوبت جدید</h3>
     <div class="field">
       <label>نام مشتری</label>
-      <input type="text" id="input-name" list="name-suggestions" autocomplete="off">
+      <div class="input-wrap">
+        <input type="text" id="input-name" list="name-suggestions" autocomplete="off">
+        <button type="button" class="hist-btn" id="hist-btn" aria-label="سابقه مراجعات">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span id="hist-count"></span>
+        </button>
+      </div>
       <datalist id="name-suggestions"></datalist>
     </div>
     <button type="button" class="companion-toggle" id="companion-toggle" aria-pressed="false">
@@ -754,7 +831,6 @@
     </div>
 
     <button class="submit-btn" id="submit-appt">ثبت نوبت</button>
-    <button class="delete-btn" id="sheet-delete-btn" style="display:none;">حذف نوبت</button>
   </div>
 
   <!-- Login sheet -->
@@ -774,6 +850,65 @@
     </div>
     <div class="error-msg" id="login-error"></div>
     <button class="submit-btn" id="login-submit">ورود</button>
+  </div>
+
+  <!-- Settings sheet -->
+  <div class="sheet" id="settings-sheet">
+    <button class="sheet-close" id="settings-close" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div class="sheet-handle"></div>
+    <h3>تنظیمات</h3>
+    <div class="set-title">حساب آنلاین</div>
+    <div class="set-account" id="set-account"></div>
+    <div class="set-list">
+      <button class="menu-item hidden" id="menu-login">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        ورود به حساب آنلاین
+      </button>
+      <button class="menu-item hidden" id="menu-sync">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        همگام‌سازی الان
+      </button>
+      <button class="menu-item hidden" id="menu-logout">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M10 5H6v14h4M14 8l4 4-4 4M18 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        خروج از حساب
+      </button>
+    </div>
+    <div class="set-title">اطلاعات</div>
+    <div class="set-list">
+      <button class="menu-item" id="menu-backup">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 4v11M8 11l4 4 4-4M5 20h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        پشتیبان‌گیری
+      </button>
+      <button class="menu-item" id="menu-restore">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 20V9M8 13l4-4 4 4M5 4h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        بازیابی
+      </button>
+    </div>
+    <div class="set-title">ظاهر</div>
+    <div class="set-list">
+      <button class="menu-item" id="menu-theme">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4-4-7.4-9-7.4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1" fill="currentColor"/><circle cx="10.5" cy="7" r="1" fill="currentColor"/><circle cx="15" cy="7.5" r="1" fill="currentColor"/></svg>
+        تغییر تم رنگی
+        <span class="set-current" id="set-theme-name"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Theme sheet -->
+  <div class="sheet" id="theme-sheet">
+    <button class="sheet-close" id="theme-close" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div class="sheet-handle"></div>
+    <h3>تغییر تم رنگی</h3>
+    <div class="theme-grid" id="theme-grid"></div>
+  </div>
+
+  <!-- History sheet -->
+  <div class="sheet" id="history-sheet">
+    <button class="sheet-close" id="history-close" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+    <div class="sheet-handle"></div>
+    <h3 id="history-title">سابقه مراجعات</h3>
+    <div class="hist-summary" id="history-summary"></div>
+    <div class="hist-list" id="history-list"></div>
   </div>
 
   <!-- Delete confirm -->
@@ -1279,18 +1414,65 @@ function checkSharedContact(){
   openAddSheet({ jy: TODAY_JY, jm: TODAY_JM, jd: TODAY_JD }, false);
   document.getElementById('input-name').value = parsed.name;
   document.getElementById('input-phone').value = parsed.phone;
+  updateHistoryBtn();
   showToast('اطلاعات از اشتراک‌گذاری پر شد، بررسی کن');
 }
 
+/* ---- layers: every popup takes one history entry so Android Back closes it, not the app ---- */
+const layers = [];
+let histPos = 0, reconTimer = 0;
+function layerOpen(name){
+  if(layers.includes(name)) return;
+  layers.push(name);
+  try{ history.pushState({ d: layers.length }, ''); histPos++; }catch(e){}
+}
+function layerClose(name){
+  const i = layers.lastIndexOf(name);
+  if(i < 0) return;
+  layers.splice(i, 1);
+  if(reconTimer) return;
+  reconTimer = setTimeout(() => {
+    reconTimer = 0;
+    const n = histPos - layers.length;
+    if(n > 0){ histPos = layers.length; try{ history.go(-n); }catch(e){} }
+  }, 0);
+}
+function closerFor(name){
+  return { sheet: closeSheet, confirm: closeConfirm, login: closeLogin,
+           settings: closeSettings, theme: closeTheme, history: closeHistory }[name];
+}
+window.addEventListener('popstate', (e) => {
+  const d = (e.state && e.state.d) || 0;
+  histPos = d;
+  while(layers.length > d){
+    const name = layers.pop();
+    const fn = closerFor(name);
+    if(fn) fn();
+  }
+});
+try{ history.replaceState({ d: 0 }, ''); }catch(e){}
+function closeTopLayer(){
+  const name = layers[layers.length - 1];
+  const fn = name && closerFor(name);
+  if(fn) fn();
+}
+function syncBackdrop(){
+  const ids = ['sheet','login-sheet','settings-sheet','theme-sheet','history-sheet','confirm-box'];
+  const any = ids.some(id => document.getElementById(id).classList.contains('show'));
+  backdrop.classList.toggle('show', any);
+}
+
 function openSheetUI(){
-  backdrop.classList.add('show');
   sheet.classList.add('show');
+  layerOpen('sheet');
+  syncBackdrop();
 }
 function closeSheet(){
-  backdrop.classList.remove('show');
   sheet.classList.remove('show');
+  syncBackdrop();
+  layerClose('sheet');
 }
-backdrop.addEventListener('click', () => { closeSheet(); closeConfirm(); closeLogin(); });
+backdrop.addEventListener('click', closeTopLayer);
 document.getElementById('sheet-close').addEventListener('click', closeSheet);
 
 function openAddSheet(dateCtx, showDate){
@@ -1312,6 +1494,7 @@ function openAddSheet(dateCtx, showDate){
   companionBtn.classList.remove('active');
   companionBtn.setAttribute('aria-pressed', 'false');
   refreshNameSuggestions();
+  updateHistoryBtn();
   fillDateSelects(dateCtx.jy, dateCtx.jm, dateCtx.jd);
   updateTimeOptions();
 
@@ -1334,6 +1517,7 @@ function openEditSheet(appt){
   document.getElementById('companion-toggle').style.display = 'none';
   selectStatusOption(appt.status || '');
   refreshNameSuggestions();
+  updateHistoryBtn();
   fillDateSelects(appt.jy, appt.jm, appt.jd);
   updateTimeOptions({ hour: appt.hour, minute: appt.minute }, { skipPastFilter: true });
 
@@ -1432,12 +1616,14 @@ function openConfirm(text, confirmLabel, actionFn){
   confirmActionFn = actionFn;
   document.getElementById('confirm-text').textContent = text;
   document.getElementById('confirm-delete').textContent = confirmLabel;
-  backdrop.classList.add('show');
   confirmBox.classList.add('show');
+  layerOpen('confirm');
+  syncBackdrop();
 }
 function closeConfirm(){
   confirmBox.classList.remove('show');
-  if(!sheet.classList.contains('show') && !loginSheet.classList.contains('show')) backdrop.classList.remove('show');
+  syncBackdrop();
+  layerClose('confirm');
 }
 document.getElementById('confirm-cancel').addEventListener('click', () => { confirmActionFn = null; closeConfirm(); });
 document.getElementById('confirm-delete').addEventListener('click', () => {
@@ -1457,7 +1643,6 @@ function openDeleteConfirm(a){
       persistAppointments();
       showToast('نوبت حذف شد');
       closeSheet();
-      backdrop.classList.remove('show');
       renderToday();
       renderCalendar();
     }
@@ -1589,6 +1774,137 @@ document.getElementById('restore-file-input').addEventListener('change', (e) => 
   reader.readAsText(file);
 });
 
+/* ============ Customer history ============ */
+function normName(x){
+  return String(x||'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[\u200c\s]+/g,' ').trim().toLowerCase();
+}
+function normPhone(x){
+  return String(x||'').replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
+}
+function customerAppts(){
+  const n = normName(document.getElementById('input-name').value);
+  const ph = normPhone(document.getElementById('input-phone').value);
+  if(!n && ph.length < 7) return [];
+  return appointments
+    .filter(a => a.id !== editingId && ((n && normName(a.name) === n) || (ph.length >= 7 && normPhone(a.phone) === ph)))
+    .sort((a,b) => apptDateObj(b) - apptDateObj(a));
+}
+function updateHistoryBtn(){
+  const list = customerAppts();
+  const btn = document.getElementById('hist-btn');
+  btn.classList.toggle('show', list.length > 0);
+  document.getElementById('hist-count').textContent = list.length ? toFa(list.length) : '';
+}
+document.getElementById('input-name').addEventListener('input', updateHistoryBtn);
+document.getElementById('input-name').addEventListener('change', updateHistoryBtn);
+document.getElementById('input-phone').addEventListener('input', updateHistoryBtn);
+
+const historySheet = document.getElementById('history-sheet');
+function openHistory(){
+  const list = customerAppts();
+  if(!list.length) return;
+  const who = document.getElementById('input-name').value.trim() || list[0].name || list[0].phone;
+  document.getElementById('history-title').textContent = 'سابقه مراجعات ' + who;
+  const done = list.filter(a => a.status === 'done').length;
+  const noshow = list.filter(a => a.status === 'noshow').length;
+  document.getElementById('history-summary').textContent =
+    `${toFa(list.length)} نوبت ثبت‌شده — ${toFa(done)} بار اومده، ${toFa(noshow)} بار نیومده`;
+  document.getElementById('history-list').innerHTML = list.map(a => {
+    const dow = WEEKDAY_FULL[apptDateObj(a).getDay()];
+    let chip = '<span class="hist-chip">بدون وضعیت</span>';
+    if(a.status === 'done') chip = '<span class="hist-chip ok">اومد</span>';
+    else if(a.status === 'noshow') chip = '<span class="hist-chip bad">نیومد</span>';
+    else if(!isPastAppt(a)) chip = '<span class="hist-chip future">نوبت آینده</span>';
+    return `<div class="hist-row">
+      <div class="hist-top"><div class="hist-date">${dow} ${toFa(a.jd)} ${MONTH_NAMES[a.jm-1]} ${toFa(a.jy)}</div>${chip}</div>
+      <div class="hist-time">ساعت ${toFa(pad2(a.hour))}:${toFa(pad2(a.minute))}</div>
+      ${a.note && a.note.trim() ? `<div class="hist-note">${escapeHtml(a.note)}</div>` : ''}
+    </div>`;
+  }).join('');
+  historySheet.classList.add('show');
+  layerOpen('history');
+  syncBackdrop();
+}
+function closeHistory(){
+  historySheet.classList.remove('show');
+  syncBackdrop();
+  layerClose('history');
+}
+document.getElementById('hist-btn').addEventListener('click', openHistory);
+document.getElementById('history-close').addEventListener('click', closeHistory);
+
+/* ============ Settings + themes ============ */
+const settingsSheet = document.getElementById('settings-sheet');
+const themeSheet = document.getElementById('theme-sheet');
+function openSettings(){
+  settingsSheet.classList.add('show');
+  layerOpen('settings');
+  syncBackdrop();
+  if(sync) renderSyncUI(sync.getState());
+}
+function closeSettings(){
+  settingsSheet.classList.remove('show');
+  syncBackdrop();
+  layerClose('settings');
+}
+document.getElementById('menu-settings').addEventListener('click', () => {
+  document.getElementById('menu-dropdown').classList.remove('show');
+  openSettings();
+});
+document.getElementById('settings-close').addEventListener('click', closeSettings);
+
+const THEMES = [
+  { id:'gold',      name:'طلایی و قهوه‌ای', bg:'#15110c', surface:'#2b2216', accent:'#c9a25c', text:'#f3ecd9' },
+  { id:'redwhite',  name:'سفید و قرمز',      bg:'#fbf6f4', surface:'#f0e2de', accent:'#d62839', text:'#2b1b1b' },
+  { id:'emerald',   name:'مشکی و زمردی',     bg:'#0b1512', surface:'#1b2f27', accent:'#34d399', text:'#e8f5f0' },
+  { id:'navy',      name:'سرمه‌ای و نارنجی', bg:'#0c1220', surface:'#1e2b47', accent:'#ff8a3d', text:'#eef2fb' },
+  { id:'bluewhite', name:'سفید و آبی',       bg:'#f4f7fc', surface:'#e1e9f7', accent:'#2563eb', text:'#14213d' },
+  { id:'violet',    name:'بنفش و صورتی',     bg:'#130f1f', surface:'#2b2140', accent:'#c084fc', text:'#f3ecfb' }
+];
+let currentTheme = 'gold';
+try{ const t = localStorage.getItem('arman_cut_theme'); if(THEMES.some(x => x.id === t)) currentTheme = t; }catch(e){}
+function applyTheme(id, save){
+  const th = THEMES.find(x => x.id === id) || THEMES[0];
+  currentTheme = th.id;
+  if(th.id === 'gold') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', th.id);
+  const light = th.id === 'redwhite' || th.id === 'bluewhite';
+  document.getElementById('meta-theme').setAttribute('content', th.bg);
+  const cs = document.querySelector('meta[name="color-scheme"]');
+  if(cs) cs.setAttribute('content', light ? 'light' : 'dark');
+  document.getElementById('set-theme-name').textContent = th.name;
+  if(save){ try{ localStorage.setItem('arman_cut_theme', th.id); }catch(e){} }
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.toggle('active', c.dataset.theme === th.id));
+}
+function buildThemeGrid(){
+  document.getElementById('theme-grid').innerHTML = THEMES.map(t => `
+    <button class="theme-card" data-theme="${t.id}">
+      <div class="theme-prev" style="background:${t.bg}">
+        <div class="r"><i style="background:${t.accent}"></i><i style="background:${t.surface}; flex:1"></i></div>
+        <i style="background:${t.text}; opacity:.55; width:70%"></i>
+        <i style="background:${t.surface}; width:45%"></i>
+      </div>
+      <div class="theme-name">${t.name}</div>
+    </button>`).join('');
+  document.querySelectorAll('.theme-card').forEach(c => c.addEventListener('click', () => {
+    applyTheme(c.dataset.theme, true);
+  }));
+}
+function openTheme(){
+  themeSheet.classList.add('show');
+  layerOpen('theme');
+  syncBackdrop();
+}
+function closeTheme(){
+  themeSheet.classList.remove('show');
+  syncBackdrop();
+  layerClose('theme');
+}
+document.getElementById('menu-theme').addEventListener('click', openTheme);
+document.getElementById('theme-close').addEventListener('click', closeTheme);
+buildThemeGrid();
+applyTheme(currentTheme, false);
+
 /* ============ Online sync (Supabase) ============ */
 const loginSheet = document.getElementById('login-sheet');
 function openLogin(){
@@ -1596,12 +1912,14 @@ function openLogin(){
   document.getElementById('login-email').value = st.email || '';
   document.getElementById('login-pass').value = '';
   document.getElementById('login-error').classList.remove('show');
-  backdrop.classList.add('show');
   loginSheet.classList.add('show');
+  layerOpen('login');
+  syncBackdrop();
 }
 function closeLogin(){
   loginSheet.classList.remove('show');
-  if(!sheet.classList.contains('show') && !confirmBox.classList.contains('show')) backdrop.classList.remove('show');
+  syncBackdrop();
+  layerClose('login');
 }
 document.getElementById('login-close').addEventListener('click', closeLogin);
 document.getElementById('login-submit').addEventListener('click', async () => {
@@ -1654,6 +1972,12 @@ function renderSyncUI(st){
     if(st.loggedIn && st.email) h += '<br><b>' + st.email.replace(/[<>&]/g,'') + '</b>';
     if(st.loggedIn && st.lastSyncAt) h += '<br>آخرین همگام‌سازی: ' + fmtAgo(st.lastSyncAt);
     el.innerHTML = h;
+  }
+  const acc = document.getElementById('set-account');
+  if(acc){
+    if(!st.configured) acc.textContent = 'اتصال آنلاین هنوز تنظیم نشده (config.js)';
+    else if(!st.loggedIn) acc.textContent = 'وارد حساب آنلاین نشدی؛ نوبت‌ها فقط روی همین گوشی ذخیره می‌شن.';
+    else acc.innerHTML = 'ایمیل: <b>' + (st.email||'').replace(/[<>&]/g,'') + '</b><br>' + (STATUS_TEXT[st.status]||'') + (st.lastSyncAt ? ' — ' + fmtAgo(st.lastSyncAt) : '');
   }
   document.getElementById('menu-login').classList.toggle('hidden', !st.configured || st.loggedIn);
   document.getElementById('menu-sync').classList.toggle('hidden', !st.loggedIn);
