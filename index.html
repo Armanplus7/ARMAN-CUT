@@ -7,66 +7,94 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" id="meta-theme" content="#15110c">
+<meta name="theme-color" id="meta-theme" content="#fbf6ec">
 <script>try{var __t=localStorage.getItem("arman_cut_theme");if(__t)document.documentElement.setAttribute("data-theme",__t);}catch(e){}</script>
-<meta name="color-scheme" content="dark">
+<meta name="color-scheme" content="light">
 <link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="ARMAN CUT">
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root{
-    color-scheme: dark;
-    --bg:#15110c;
-    --bg-2:#1b1611;
-    --surface:#221b14;
-    --surface-2:#2b2216;
-    --border:#3a2f21;
-    --gold:#c9a25c;
-    --gold-dim:#8f7643;
-    --gold-glow:rgba(201,162,92,0.16);
-    --rust:#9a5240;
-    --text:#f3ead9;
-    --text-dim:#a89478;
-    --text-faint:#6f6250;
-    --sage:#7f9a72;
-    --danger:#b3563f;
+    color-scheme:light;
+    --bg:#fbf6ec; --bg-2:#ffffff; --surface:#f3eadb; --surface-2:#ffffff; --border:#e6d9c2;
+    --gold:#b8862b; --gold-dim:#d6b882; --gold-glow:rgba(184,134,43,.13); --rust:#b3563f;
+    --text:#2e2415; --text-dim:#7d6b4f; --text-faint:#b3a68d; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(184,134,43,.35); --backdrop:rgba(46,36,21,.38); --shadow:rgba(46,36,21,.18);
     --radius-card:14px;
     --radius-sheet:22px;
-    --on-accent:#1c1610;
-    --accent-shadow:rgba(201,162,92,.35);
-    --backdrop:rgba(10,8,6,.6);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
   }
-  html[data-theme="redwhite"]{color-scheme:light;
+  html[data-theme="redwhite"]{
+    color-scheme:light;
     --bg:#fbf6f4; --bg-2:#ffffff; --surface:#f5ecea; --surface-2:#ffffff; --border:#e8d9d5;
-    --gold:#d62839; --gold-dim:#e58a93; --gold-glow:rgba(214,40,57,.10); --rust:#b3563f;
+    --gold:#d62839; --gold-dim:#e7858d; --gold-glow:rgba(214,40,57,.13); --rust:#b3563f;
     --text:#2b1b1b; --text-dim:#7a6462; --text-faint:#b09c99; --sage:#2f8f55; --danger:#9b1c1c;
-    --on-accent:#ffffff; --accent-shadow:rgba(214,40,57,.35); --backdrop:rgba(40,20,20,.35);}
-  html[data-theme="emerald"]{color-scheme:dark;
-    --bg:#0b1512; --bg-2:#101d19; --surface:#15251f; --surface-2:#1b2f27; --border:#26413a;
-    --gold:#34d399; --gold-dim:#1f8f68; --gold-glow:rgba(52,211,153,.14); --rust:#d08a4e;
-    --text:#e8f5f0; --text-dim:#8fb3a7; --text-faint:#587468; --sage:#7fd1a0; --danger:#e0584f;
-    --on-accent:#06261b; --accent-shadow:rgba(52,211,153,.30); --backdrop:rgba(2,10,8,.65);}
-  html[data-theme="navy"]{color-scheme:dark;
-    --bg:#0c1220; --bg-2:#111a2e; --surface:#172238; --surface-2:#1e2b47; --border:#2a3a5c;
-    --gold:#ff8a3d; --gold-dim:#b3622b; --gold-glow:rgba(255,138,61,.14); --rust:#d9674a;
-    --text:#eef2fb; --text-dim:#8fa0c4; --text-faint:#5a6a8c; --sage:#6fcf97; --danger:#e5534b;
-    --on-accent:#2a1300; --accent-shadow:rgba(255,138,61,.32); --backdrop:rgba(4,8,18,.65);}
-  html[data-theme="bluewhite"]{color-scheme:light;
+    --on-accent:#ffffff; --accent-shadow:rgba(214,40,57,.35); --backdrop:rgba(43,27,27,.38); --shadow:rgba(43,27,27,.18);
+  }
+  html[data-theme="bluewhite"]{
+    color-scheme:light;
     --bg:#f4f7fc; --bg-2:#ffffff; --surface:#eaf0fa; --surface-2:#ffffff; --border:#d5dff0;
-    --gold:#2563eb; --gold-dim:#7fa2ee; --gold-glow:rgba(37,99,235,.10); --rust:#c2603f;
-    --text:#14213d; --text-dim:#5c6b8a; --text-faint:#9aa7c2; --sage:#2a8f62; --danger:#d64545;
-    --on-accent:#ffffff; --accent-shadow:rgba(37,99,235,.35); --backdrop:rgba(15,25,50,.35);}
-  html[data-theme="violet"]{color-scheme:dark;
-    --bg:#130f1f; --bg-2:#1a1428; --surface:#221a33; --surface-2:#2b2140; --border:#3b2d57;
-    --gold:#c084fc; --gold-dim:#7e57b0; --gold-glow:rgba(192,132,252,.15); --rust:#e08aa8;
-    --text:#f3ecfb; --text-dim:#a898c4; --text-faint:#6e5f8c; --sage:#7fd1a0; --danger:#f0647a;
-    --on-accent:#230b3a; --accent-shadow:rgba(192,132,252,.32); --backdrop:rgba(8,4,16,.65);}
-  *{box-sizing:border-box; margin:0; padding:0;}
+    --gold:#2563eb; --gold-dim:#82a6f3; --gold-glow:rgba(37,99,235,.13); --rust:#b3563f;
+    --text:#14213d; --text-dim:#5c6b8a; --text-faint:#9aa7c2; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(37,99,235,.35); --backdrop:rgba(20,33,61,.38); --shadow:rgba(20,33,61,.18);
+  }
+  html[data-theme="mint"]{
+    color-scheme:light;
+    --bg:#f1faf5; --bg-2:#ffffff; --surface:#e3f3ea; --surface-2:#ffffff; --border:#cfe8da;
+    --gold:#0f9d6e; --gold-dim:#75c7ab; --gold-glow:rgba(15,157,110,.13); --rust:#b3563f;
+    --text:#12301f; --text-dim:#587a68; --text-faint:#9ab8a8; --sage:#1f7a4d; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(15,157,110,.35); --backdrop:rgba(18,48,31,.38); --shadow:rgba(18,48,31,.18);
+  }
+  html[data-theme="pink"]{
+    color-scheme:light;
+    --bg:#fdf3f6; --bg-2:#ffffff; --surface:#f9e5ec; --surface-2:#ffffff; --border:#f0d0dc;
+    --gold:#d93b79; --gold-dim:#e98eb1; --gold-glow:rgba(217,59,121,.13); --rust:#b3563f;
+    --text:#35121f; --text-dim:#85596b; --text-faint:#c0a0ad; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(217,59,121,.35); --backdrop:rgba(53,18,31,.38); --shadow:rgba(53,18,31,.18);
+  }
+  html[data-theme="lavender"]{
+    color-scheme:light;
+    --bg:#f6f3fd; --bg-2:#ffffff; --surface:#ebe5f8; --surface-2:#ffffff; --border:#d9cff0;
+    --gold:#7c5cd6; --gold-dim:#b3a0e8; --gold-glow:rgba(124,92,214,.13); --rust:#b3563f;
+    --text:#251a40; --text-dim:#6d6190; --text-faint:#aaa1c6; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(124,92,214,.35); --backdrop:rgba(37,26,64,.38); --shadow:rgba(37,26,64,.18);
+  }
+  html[data-theme="orange"]{
+    color-scheme:light;
+    --bg:#fff6ec; --bg-2:#ffffff; --surface:#fde9d3; --surface-2:#ffffff; --border:#f4d5b3;
+    --gold:#dd6b10; --gold-dim:#ecaa73; --gold-glow:rgba(221,107,16,.13); --rust:#b3563f;
+    --text:#3a2108; --text-dim:#8a6a48; --text-faint:#c0a78b; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(221,107,16,.35); --backdrop:rgba(58,33,8,.38); --shadow:rgba(58,33,8,.18);
+  }
+  html[data-theme="teal"]{
+    color-scheme:light;
+    --bg:#f0f9fa; --bg-2:#ffffff; --surface:#dff1f3; --surface-2:#ffffff; --border:#c7e3e7;
+    --gold:#0b8a97; --gold-dim:#72bcc4; --gold-glow:rgba(11,138,151,.13); --rust:#b3563f;
+    --text:#0f2f33; --text-dim:#4f7a80; --text-faint:#98b9bd; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(11,138,151,.35); --backdrop:rgba(15,47,51,.38); --shadow:rgba(15,47,51,.18);
+  }
+  html[data-theme="coffee"]{
+    color-scheme:light;
+    --bg:#f8f2ec; --bg-2:#ffffff; --surface:#efe4d9; --surface-2:#ffffff; --border:#e0d0c0;
+    --gold:#8a5a3b; --gold-dim:#bc9e8b; --gold-glow:rgba(138,90,59,.13); --rust:#b3563f;
+    --text:#2f2118; --text-dim:#7b6454; --text-faint:#b7a698; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#ffffff; --accent-shadow:rgba(138,90,59,.35); --backdrop:rgba(47,33,24,.38); --shadow:rgba(47,33,24,.18);
+  }
+  html[data-theme="yellow"]{
+    color-scheme:light;
+    --bg:#fffbea; --bg-2:#ffffff; --surface:#fbf0c4; --surface-2:#ffffff; --border:#efe0a0;
+    --gold:#c28f00; --gold-dim:#ddc069; --gold-glow:rgba(194,143,0,.13); --rust:#b3563f;
+    --text:#2e2600; --text-dim:#7d6d2a; --text-faint:#bdb27a; --sage:#2f8f55; --danger:#c0392b;
+    --on-accent:#2e2300; --accent-shadow:rgba(194,143,0,.35); --backdrop:rgba(46,38,0,.38); --shadow:rgba(46,38,0,.18);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  @supports (-webkit-touch-callout:none){ input,select,textarea{font-size:16px !important;} }
   html,body{height:100%; background:var(--bg); overflow:hidden;}
   body{
     font-family:'Vazirmatn', Tahoma, sans-serif;
@@ -94,11 +122,11 @@
     position:relative;
     flex:none;
     z-index:5;
-    padding:28px 22px 14px;
+    padding:calc(28px + var(--safe-top)) 22px 14px;
   }
   .menu-btn{
     position:absolute;
-    top:26px; right:20px;
+    top:calc(26px + var(--safe-top)); right:20px;
     width:36px;height:36px;
     border-radius:50%;
     border:1px solid var(--border);
@@ -113,13 +141,13 @@
   .menu-btn svg{width:18px;height:18px;}
   .menu-dropdown{
     position:absolute;
-    top:68px; right:20px;
+    top:calc(68px + var(--safe-top)); right:20px;
     background:var(--surface-2);
     border:1px solid var(--border);
     border-radius:14px;
     padding:6px;
     min-width:170px;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
+    box-shadow:0 10px 30px var(--shadow);
     z-index:15;
     display:none;
     flex-direction:column;
@@ -405,7 +433,7 @@
     align-items:center;
     gap:6px;
     padding:5px;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
+    box-shadow:0 10px 30px var(--shadow);
   }
   .tabbar .pill{
     position:absolute;
@@ -631,7 +659,7 @@
     opacity:0;
     transition:transform .3s cubic-bezier(.32,.72,0,1), opacity .3s;
     z-index:30;
-    box-shadow:0 10px 24px rgba(0,0,0,.4);
+    box-shadow:0 10px 24px var(--shadow);
     white-space:nowrap;
   }
   .toast.show{transform:translate(-50%,0); opacity:1;}
@@ -682,18 +710,19 @@
   .set-account b{color:var(--text); font-weight:600; direction:ltr; unicode-bidi:plaintext; word-break:break-all;}
   .set-list .menu-item{background:var(--surface); border:1px solid var(--border); padding:13px 14px; margin-bottom:8px; border-radius:12px; font-size:14px;}
   .set-list .menu-item .set-current{margin-inline-start:auto; font-size:12px; color:var(--text-dim);}
-  .theme-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .theme-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:9px;}
   .theme-card{
     background:var(--surface); border:2px solid var(--border); border-radius:14px;
-    padding:8px; cursor:pointer; font-family:inherit; color:var(--text); text-align:center;
-    display:flex; flex-direction:column; gap:7px;
+    padding:6px; cursor:pointer; font-family:inherit; color:var(--text); text-align:center;
+    display:flex; flex-direction:column; gap:6px;
   }
   .theme-card.active{border-color:var(--gold);}
-  .theme-prev{height:62px; border-radius:9px; padding:8px; display:flex; flex-direction:column; gap:5px; border:1px solid rgba(128,128,128,.25);}
-  .theme-prev i{display:block; height:9px; border-radius:5px;}
+  .theme-card{border-width:2px;}
+  .theme-prev{height:40px; border-radius:7px; padding:6px; display:flex; flex-direction:column; gap:4px; border:1px solid rgba(128,128,128,.25);}
+  .theme-prev i{display:block; height:6px; border-radius:4px;}
   .theme-prev .r{display:flex; gap:5px; align-items:center;}
-  .theme-prev .r i:first-child{width:18px; height:18px; border-radius:50%;}
-  .theme-name{font-size:12.5px; font-weight:600;}
+  .theme-prev .r i:first-child{width:12px; height:12px; border-radius:50%;}
+  .theme-name{font-size:11px; font-weight:600; line-height:1.4;}
 </style>
 </head>
 <body>
@@ -706,12 +735,16 @@
     </button>
     <div class="menu-dropdown" id="menu-dropdown">
       <div class="menu-status" id="menu-status"></div>
+      <button class="menu-item hidden" id="menu-sync">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        همگام‌سازی
+      </button>
       <button class="menu-item" id="menu-settings">
         <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5h0a1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
         تنظیمات
       </button>
     </div>
-    <input type="file" id="restore-file-input" accept="application/json" style="display:none;">
+    <input type="file" id="restore-file-input" accept=".json,application/json" style="display:none;">
 
     <div class="brand-row" dir="ltr">
       <div class="brand-name"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
@@ -864,10 +897,6 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M7 18a4 4 0 0 1-.6-7.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
         ورود به حساب آنلاین
       </button>
-      <button class="menu-item hidden" id="menu-sync">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M20 11a8 8 0 0 0-14-4M4 4v4h4M4 13a8 8 0 0 0 14 4M20 20v-4h-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        همگام‌سازی الان
-      </button>
       <button class="menu-item hidden" id="menu-logout">
         <svg viewBox="0 0 24 24" fill="none"><path d="M10 5H6v14h4M14 8l4 4-4 4M18 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         خروج از حساب
@@ -888,7 +917,7 @@
     <div class="set-list">
       <button class="menu-item" id="menu-theme">
         <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.8 1.8-1.7 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4-4-7.4-9-7.4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1" fill="currentColor"/><circle cx="10.5" cy="7" r="1" fill="currentColor"/><circle cx="15" cy="7.5" r="1" fill="currentColor"/></svg>
-        تغییر تم رنگی
+        تم
         <span class="set-current" id="set-theme-name"></span>
       </button>
     </div>
@@ -898,7 +927,7 @@
   <div class="sheet" id="theme-sheet">
     <button class="sheet-close" id="theme-close" aria-label="بستن"><svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     <div class="sheet-handle"></div>
-    <h3>تغییر تم رنگی</h3>
+    <h3>تم</h3>
     <div class="theme-grid" id="theme-grid"></div>
   </div>
 
@@ -1591,7 +1620,7 @@ document.getElementById('submit-appt').addEventListener('click', () => {
     if(secondSlot){
       appointments.push({
         id: 'a' + Date.now() + Math.random().toString(36).slice(2,7),
-        name, phone, note, jy, jm, jd, hour: secondSlot.hour, minute: secondSlot.minute
+        name: name ? name + ' ۲' : name, phone, note, jy, jm, jd, hour: secondSlot.hour, minute: secondSlot.minute
       });
     }
   }
@@ -1727,6 +1756,17 @@ document.getElementById('menu-backup').addEventListener('click', async () => {
     }
   }
 
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  if(isIOS){
+    try{
+      const file = new File([data], filename, { type: 'application/json' });
+      if(navigator.canShare && navigator.canShare({ files: [file] })){
+        await navigator.share({ files: [file], title: 'پشتیبان ARMAN CUT' });
+        showToast('پشتیبان آماده شد');
+        return;
+      }
+    }catch(e){ if(e && e.name === 'AbortError') return; }
+  }
   const blob = new Blob([data], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -1854,24 +1894,27 @@ document.getElementById('menu-settings').addEventListener('click', () => {
 document.getElementById('settings-close').addEventListener('click', closeSettings);
 
 const THEMES = [
-  { id:'gold',      name:'طلایی و قهوه‌ای', bg:'#15110c', surface:'#2b2216', accent:'#c9a25c', text:'#f3ecd9' },
-  { id:'redwhite',  name:'سفید و قرمز',      bg:'#fbf6f4', surface:'#f0e2de', accent:'#d62839', text:'#2b1b1b' },
-  { id:'emerald',   name:'مشکی و زمردی',     bg:'#0b1512', surface:'#1b2f27', accent:'#34d399', text:'#e8f5f0' },
-  { id:'navy',      name:'سرمه‌ای و نارنجی', bg:'#0c1220', surface:'#1e2b47', accent:'#ff8a3d', text:'#eef2fb' },
-  { id:'bluewhite', name:'سفید و آبی',       bg:'#f4f7fc', surface:'#e1e9f7', accent:'#2563eb', text:'#14213d' },
-  { id:'violet',    name:'بنفش و صورتی',     bg:'#130f1f', surface:'#2b2140', accent:'#c084fc', text:'#f3ecfb' }
+  { id:'cream', name:'کرم و طلایی', bg:'#fbf6ec', surface:'#f3eadb', accent:'#b8862b', text:'#2e2415' },
+  { id:'redwhite', name:'سفید و قرمز', bg:'#fbf6f4', surface:'#f5ecea', accent:'#d62839', text:'#2b1b1b' },
+  { id:'bluewhite', name:'سفید و آبی', bg:'#f4f7fc', surface:'#eaf0fa', accent:'#2563eb', text:'#14213d' },
+  { id:'mint', name:'سفید و سبز', bg:'#f1faf5', surface:'#e3f3ea', accent:'#0f9d6e', text:'#12301f' },
+  { id:'pink', name:'صورتی و سفید', bg:'#fdf3f6', surface:'#f9e5ec', accent:'#d93b79', text:'#35121f' },
+  { id:'lavender', name:'یاسی و بنفش', bg:'#f6f3fd', surface:'#ebe5f8', accent:'#7c5cd6', text:'#251a40' },
+  { id:'orange', name:'نارنجی و کرم', bg:'#fff6ec', surface:'#fde9d3', accent:'#dd6b10', text:'#3a2108' },
+  { id:'teal', name:'فیروزه‌ای و سفید', bg:'#f0f9fa', surface:'#dff1f3', accent:'#0b8a97', text:'#0f2f33' },
+  { id:'coffee', name:'شیری و قهوه‌ای', bg:'#f8f2ec', surface:'#efe4d9', accent:'#8a5a3b', text:'#2f2118' },
+  { id:'yellow', name:'زرد و سفید', bg:'#fffbea', surface:'#fbf0c4', accent:'#c28f00', text:'#2e2600' }
 ];
-let currentTheme = 'gold';
+let currentTheme = 'cream';
 try{ const t = localStorage.getItem('arman_cut_theme'); if(THEMES.some(x => x.id === t)) currentTheme = t; }catch(e){}
 function applyTheme(id, save){
   const th = THEMES.find(x => x.id === id) || THEMES[0];
   currentTheme = th.id;
-  if(th.id === 'gold') document.documentElement.removeAttribute('data-theme');
+  if(th.id === 'cream') document.documentElement.removeAttribute('data-theme');
   else document.documentElement.setAttribute('data-theme', th.id);
-  const light = th.id === 'redwhite' || th.id === 'bluewhite';
   document.getElementById('meta-theme').setAttribute('content', th.bg);
   const cs = document.querySelector('meta[name="color-scheme"]');
-  if(cs) cs.setAttribute('content', light ? 'light' : 'dark');
+  if(cs) cs.setAttribute('content', 'light');
   document.getElementById('set-theme-name').textContent = th.name;
   if(save){ try{ localStorage.setItem('arman_cut_theme', th.id); }catch(e){} }
   document.querySelectorAll('.theme-card').forEach(c => c.classList.toggle('active', c.dataset.theme === th.id));
@@ -1969,7 +2012,6 @@ function renderSyncUI(st){
     let h = STATUS_TEXT[st.status] || '';
     if(st.message && st.status === 'error') h = st.message;
     if(st.pendingCount) h += ' (' + st.pendingCount.toLocaleString('fa-IR') + ' تغییر در صف)';
-    if(st.loggedIn && st.email) h += '<br><b>' + st.email.replace(/[<>&]/g,'') + '</b>';
     if(st.loggedIn && st.lastSyncAt) h += '<br>آخرین همگام‌سازی: ' + fmtAgo(st.lastSyncAt);
     el.innerHTML = h;
   }

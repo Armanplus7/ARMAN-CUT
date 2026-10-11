@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arman-cut-v10';
+const CACHE_NAME = 'arman-cut-v11';
 const ASSETS = [
   './',
   './index.html',
