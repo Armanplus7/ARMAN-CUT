@@ -1,7 +1,7 @@
 // تنظیمات وب‌اپ مشتری — همان آدرس و کلید اپ آرایشگر را اینجا بگذار
 // (Project Settings → API). کلید secret / service_role را هرگز اینجا نگذار.
 globalThis.BOOK_CONFIG = {
-  SUPABASE_URL: '',        // مثال: https://abcdxyz.supabase.co
+  SUPABASE_URL: 'https://brmzvdcvgywevjgfllrg.supabase.co',        // مثال: https://abcdxyz.supabase.co
   SUPABASE_ANON_KEY: '',   // کلید anon / publishable
-  SHOP_PHONE: ''           // اختیاری: شماره تماس آرایشگاه برای لغو/تغییر نوبت (مثلاً 09121234567)
+  SHOP_PHONE: '09359097238'           // اختیاری: شماره تماس آرایشگاه برای لغو/تغییر نوبت (مثلاً 09121234567)
 };
