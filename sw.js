@@ -1,4 +1,4 @@
-const CACHE_NAME = 'arman-cut-v11';
+const CACHE_NAME = 'arman-cut-v12';
 const ASSETS = [
   './',
   './index.html',
@@ -31,6 +31,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   const okHost = url.origin === self.location.origin || /(^|\.)fonts\.(googleapis|gstatic)\.com$/.test(url.hostname);
   if(!okHost) return; // never touch Supabase / other API calls
+  if(/\/book(-config)?\.(html|js)$/.test(url.pathname)) return; // customer page: always fresh from network
   if(url.origin === self.location.origin && url.pathname.endsWith('/config.js')){
     event.respondWith(
       fetch(event.request).then((res) => {

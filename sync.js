@@ -24,7 +24,8 @@
   }
   function fromRow(w) {
     return { id: String(w.id), name: w.name || '', phone: w.phone || '', note: w.note || '', status: w.status || '',
-      jy: w.jy, jm: w.jm, jd: w.jd, hour: w.hour, minute: w.minute, updatedAt: Number(w.client_ts) || 0 };
+      jy: w.jy, jm: w.jm, jd: w.jd, hour: w.hour, minute: w.minute, updatedAt: Number(w.client_ts) || 0,
+      source: w.source === 'online' ? 'online' : '' };
   }
   function validRow(w) {
     return w && w.id != null && [w.jy, w.jm, w.jd, w.hour, w.minute].every(Number.isInteger);

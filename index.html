@@ -693,6 +693,7 @@
   }
   .hist-btn.show{display:flex;}
   .hist-btn svg{width:16px;height:16px;}
+  .online-chip{font-size:10px; font-weight:700; padding:2px 7px; border-radius:99px; background:var(--gold-glow); color:var(--gold); margin-inline-start:6px; vertical-align:middle; white-space:nowrap;}
   .hist-summary{font-size:12.5px; color:var(--text-dim); margin:-6px 0 12px;}
   .hist-list{display:flex; flex-direction:column; gap:8px;}
   .hist-row{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 12px;}
@@ -1157,7 +1158,7 @@ function buildApptCard(a){
   div.innerHTML = `
     <div class="${timeClass}">${toFa(pad2(a.hour))}<br>${toFa(pad2(a.minute))}</div>
     <div class="appt-info">
-      <div class="${nameClass}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${controlHtml}</div>
+      <div class="${nameClass}"${nameDirAttr}><span class="name-text">${escapeHtml(displayName)}</span>${a.source === 'online' ? '<span class="online-chip">آنلاین</span>' : ''}${controlHtml}</div>
       ${showPhoneLine ? `<div class="appt-phone">${escapeHtml(a.phone)}</div>` : ''}
       ${hasNote ? `<div class="appt-note">${escapeHtml(a.note)}</div>` : ''}
     </div>`;
@@ -1797,7 +1798,8 @@ document.getElementById('restore-file-input').addEventListener('change', (e) => 
       seenIds.add(id);
       return { id, name: String(a.name||''), phone: String(a.phone||''), note: String(a.note||''),
         status: (a.status==='done'||a.status==='noshow') ? a.status : '',
-        jy:a.jy, jm:a.jm, jd:a.jd, hour:a.hour, minute:a.minute, updatedAt: Number(a.updatedAt)||0 };
+        jy:a.jy, jm:a.jm, jd:a.jd, hour:a.hour, minute:a.minute, updatedAt: Number(a.updatedAt)||0,
+        source: a.source === 'online' ? 'online' : '' };
     });
     openConfirm(
       'بازیابی از این فایل، همه‌ی نوبت‌های فعلی رو جایگزین می‌کنه. مطمئنی؟',
@@ -2038,6 +2040,8 @@ document.getElementById('menu-logout').addEventListener('click', () => {
 });
 document.getElementById('menu-btn').addEventListener('click', () => { if(sync) renderSyncUI(sync.getState()); });
 
+const knownOnline = new Set();
+let knownOnlineReady = false;
 let sync = null;
 try{
   if(window.ArmanSync){
@@ -2048,7 +2052,12 @@ try{
       getRecords: () => appointments,
       setRecords: (list) => { appointments = list; try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments)); }catch(e){} },
       saveRecords: () => { try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(appointments)); }catch(e){} },
-      onChange: () => { renderToday(); renderCalendar(); if(typeof renderDayList === 'function') renderDayList(); },
+      onChange: () => {
+        renderToday(); renderCalendar(); if(typeof renderDayList === 'function') renderDayList();
+        const fresh = appointments.filter(a => a.source === 'online' && !knownOnline.has(a.id));
+        fresh.forEach(a => knownOnline.add(a.id));
+        if(fresh.length && fresh.length <= 5 && knownOnlineReady) showToast(fresh.length === 1 ? 'یک نوبت آنلاین جدید ثبت شد' : toFa(fresh.length) + ' نوبت آنلاین جدید ثبت شد');
+      },
       onStatus: renderSyncUI
     });
   }
@@ -2058,6 +2067,8 @@ try{
 renderHeader();
 populateSelects();
 loadAppointments();
+appointments.forEach(a => { if(a.source === 'online') knownOnline.add(a.id); });
+setTimeout(() => { knownOnlineReady = true; }, 4000);
 if(sync){ sync.start(); renderSyncUI(sync.getState()); }
 positionPill();
 checkSharedContact();

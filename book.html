@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>رزرو نوبت | ARMAN CUT</title>
+<meta name="theme-color" content="#f4f7fc">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ARMAN CUT">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme:light;
+    --bg:#f4f7fc; --card:#ffffff; --surface:#eaf0fa; --border:#d5dff0;
+    --accent:#2563eb; --accent-dark:#1d4ed8; --accent-soft:rgba(37,99,235,.10); --accent-shadow:rgba(37,99,235,.30);
+    --text:#14213d; --dim:#5c6b8a; --faint:#9aa7c2;
+    --off-bg:#e9ecf1; --off-text:#a7aebd;
+    --ok:#2a8f62; --danger:#d64545;
+    --safe-bottom:env(safe-area-inset-bottom,0px); --safe-top:env(safe-area-inset-top,0px);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%; text-size-adjust:100%;}
+  html,body{background:var(--bg);}
+  body{
+    font-family:'Vazirmatn',Tahoma,sans-serif; color:var(--text);
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+    background:radial-gradient(520px 260px at 50% -40px, var(--accent-soft), transparent 70%), var(--bg);
+  }
+  @supports (-webkit-touch-callout:none){ input,textarea,select{font-size:16px !important;} }
+  #app{max-width:460px; margin:0 auto; padding:calc(26px + var(--safe-top)) 18px calc(40px + var(--safe-bottom));}
+  button{font-family:inherit;}
+
+  header{margin-bottom:20px;}
+  .brand{font-size:22px; font-weight:800; letter-spacing:1.8px; direction:ltr; text-align:right;}
+  .brand .b2{color:var(--accent);}
+  .sub{font-size:13.5px; color:var(--dim); margin-top:4px;}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px; box-shadow:0 6px 22px rgba(20,33,61,.05);}
+  .step{display:flex; align-items:center; gap:9px; font-size:15px; font-weight:700; margin-bottom:12px;}
+  .step i{font-style:normal; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
+
+  /* days */
+  .days{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 8px; margin:0 -4px; scroll-snap-type:x proximity; scrollbar-width:none;}
+  .days::-webkit-scrollbar{display:none;}
+  .day{
+    flex:0 0 64px; scroll-snap-align:start; border:1.5px solid var(--border); background:var(--card); border-radius:14px;
+    padding:9px 4px 8px; text-align:center; cursor:pointer; color:var(--text); transition:transform .12s, background .15s, border-color .15s;
+  }
+  .day:active{transform:scale(.95);}
+  .day .dw{font-size:11.5px; color:var(--dim);}
+  .day .dn{font-size:21px; font-weight:800; line-height:1.35;}
+  .day .dm{font-size:11px; color:var(--dim);}
+  .day .tag{display:block; font-size:10px; color:var(--accent); font-weight:700; min-height:14px;}
+  .day.fri .dw{color:var(--danger);}
+  .day.sel{background:var(--accent); border-color:var(--accent); color:#fff; box-shadow:0 6px 16px var(--accent-shadow);}
+  .day.sel .dw,.day.sel .dm,.day.sel .tag{color:rgba(255,255,255,.88);}
+  .day.full{background:var(--off-bg); border-color:transparent; color:var(--off-text); cursor:not-allowed;}
+  .day.full .dw,.day.full .dm,.day.full .tag{color:var(--off-text);}
+
+  /* slots */
+  .legend{display:flex; gap:14px; font-size:11.5px; color:var(--dim); margin:-2px 0 12px;}
+  .legend span{display:flex; align-items:center; gap:5px;}
+  .legend b{width:11px; height:11px; border-radius:4px; display:inline-block; border:1.5px solid var(--accent); background:#fff;}
+  .legend b.off{background:var(--off-bg); border-color:var(--off-bg);}
+  .gtitle{font-size:12.5px; color:var(--dim); font-weight:600; margin:12px 2px 8px;}
+  .gtitle:first-child{margin-top:0;}
+  .slots{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .slot{
+    border:1.5px solid var(--accent); background:#fff; color:var(--accent); border-radius:11px;
+    padding:10px 0; font-size:14.5px; font-weight:700; cursor:pointer; transition:transform .12s, background .15s;
+  }
+  .slot:active{transform:scale(.94);}
+  .slot.off{background:var(--off-bg); border-color:var(--off-bg); color:var(--off-text); cursor:not-allowed; font-weight:500;}
+  .slot.sel{background:var(--accent); color:#fff; box-shadow:0 6px 14px var(--accent-shadow);}
+  .empty-note{font-size:13px; color:var(--dim); text-align:center; padding:18px 6px;}
+
+  /* form */
+  .picked{background:var(--accent-soft); color:var(--accent-dark); border-radius:12px; padding:10px 12px; font-size:13.5px; font-weight:600; margin-bottom:14px;}
+  .field{margin-bottom:12px;}
+  .field label{display:block; font-size:12.5px; color:var(--dim); margin-bottom:6px;}
+  .field label em{color:var(--danger); font-style:normal;}
+  .field input,.field textarea{
+    width:100%; background:var(--bg); border:1.5px solid var(--border); border-radius:11px; padding:12px 13px;
+    font-family:inherit; font-size:15px; color:var(--text); outline:none; transition:border-color .15s;
+  }
+  .field textarea{resize:none;}
+  .field input:focus,.field textarea:focus{border-color:var(--accent);}
+  .field input[type=tel]{direction:ltr; text-align:right;}
+  .hp{position:absolute; top:0; left:0; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); opacity:0; pointer-events:none;}
+  html,body{overflow-x:hidden;}
+  .err{display:none; background:rgba(214,69,69,.09); color:var(--danger); border-radius:10px; padding:9px 12px; font-size:13px; line-height:1.8; margin-bottom:12px;}
+  .err.show{display:block;}
+  .btn{
+    width:100%; border:none; border-radius:999px; padding:14px 0; font-size:15.5px; font-weight:700; cursor:pointer;
+    background:var(--accent); color:#fff; box-shadow:0 8px 20px var(--accent-shadow); transition:transform .12s, opacity .15s;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn:disabled{opacity:.55; box-shadow:none; cursor:default;}
+  .btn.ghost{background:transparent; color:var(--accent); box-shadow:none; border:1.5px solid var(--accent); margin-top:10px;}
+
+  /* banners */
+  .banner{display:none; border-radius:12px; padding:11px 13px; font-size:13px; line-height:1.9; margin-bottom:14px;}
+  .banner.show{display:block;}
+  .banner.warn{background:#fff4dc; color:#8a5a00;}
+  .banner.bad{background:rgba(214,69,69,.09); color:var(--danger);}
+  .banner button{background:none; border:none; color:inherit; font-weight:700; text-decoration:underline; cursor:pointer; font-size:inherit;}
+
+  /* my bookings */
+  .mine{display:none;}
+  .mine.show{display:block;}
+  .mine h3{font-size:14px; margin-bottom:9px;}
+  .mine-row{display:flex; justify-content:space-between; gap:8px; padding:9px 11px; background:var(--accent-soft); border-radius:11px; margin-bottom:7px; font-size:13.5px;}
+  .mine-row b{font-weight:700;}
+
+  /* success */
+  .success{display:none; text-align:center; padding:26px 18px;}
+  .success.show{display:block;}
+  .check{width:66px; height:66px; border-radius:50%; background:rgba(42,143,98,.12); color:var(--ok); display:flex; align-items:center; justify-content:center; margin:0 auto 14px;}
+  .check svg{width:34px; height:34px;}
+  .success h2{font-size:19px; margin-bottom:6px;}
+  .success .when{font-size:16px; font-weight:700; color:var(--accent-dark); margin:12px 0 4px;}
+  .success p{font-size:13px; color:var(--dim); line-height:1.9;}
+  .success a{color:var(--accent); font-weight:700; text-decoration:none; direction:ltr; unicode-bidi:plaintext;}
+
+  .spin{display:inline-block; width:15px; height:15px; border:2.5px solid rgba(255,255,255,.5); border-top-color:#fff; border-radius:50%; animation:sp .7s linear infinite; vertical-align:-2px; margin-inline-end:6px;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .skeleton{height:150px; border-radius:12px; background:linear-gradient(90deg,var(--surface),#f6f9fe,var(--surface)); background-size:200% 100%; animation:sk 1.2s infinite;}
+  @keyframes sk{to{background-position:-200% 0;}}
+  .foot{font-size:11.5px; color:var(--faint); text-align:center; margin-top:8px; line-height:1.9;}
+  .toast{position:fixed; left:50%; bottom:calc(24px + var(--safe-bottom)); transform:translate(-50%,20px); background:var(--text); color:#fff; padding:11px 18px; border-radius:999px; font-size:13.5px; opacity:0; pointer-events:none; transition:.25s; z-index:20; max-width:90%; text-align:center;}
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand"><span class="b1">ARMAN</span> <span class="b2">CUT</span></div>
+    <div class="sub">رزرو نوبت آنلاین</div>
+  </header>
+
+  <div class="banner warn" id="banner"></div>
+
+  <div class="card mine" id="mine"><h3>نوبت‌های ثبت‌شده‌ی شما</h3><div id="mine-list"></div></div>
+
+  <div id="booking">
+    <div class="card">
+      <div class="step"><i>۱</i> روز را انتخاب کن</div>
+      <div class="days" id="days"><div class="skeleton" style="flex:1"></div></div>
+    </div>
+
+    <div class="card">
+      <div class="step"><i>۲</i> ساعت را انتخاب کن</div>
+      <div class="legend"><span><b></b> آزاد</span><span><b class="off"></b> پر شده یا گذشته</span></div>
+      <div id="slots"><div class="skeleton"></div></div>
+    </div>
+
+    <div class="card" id="form-card" style="display:none;">
+      <div class="step"><i>۳</i> اطلاعات شما</div>
+      <div class="picked" id="picked"></div>
+      <div class="field"><label>نام و نام خانوادگی <em>*</em></label><input type="text" id="f-name" autocomplete="name" maxlength="60"></div>
+      <div class="field"><label>شماره تلفن همراه <em>*</em></label><input type="tel" id="f-phone" autocomplete="tel" inputmode="tel" maxlength="16" placeholder="09123456789"></div>
+      <div class="field"><label>توضیحات (اختیاری)</label><textarea id="f-note" rows="2" maxlength="200"></textarea></div>
+      <input class="hp" type="text" id="f-web" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="err" id="f-err"></div>
+      <button class="btn" id="f-submit">ثبت نوبت</button>
+    </div>
+  </div>
+
+  <div class="card success" id="success">
+    <div class="check"><svg viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <h2>نوبت شما ثبت شد</h2>
+    <div class="when" id="s-when"></div>
+    <p id="s-name"></p>
+    <p style="margin-top:10px;">لطفاً چند دقیقه زودتر حضور داشته باشید.<br><span id="s-contact">برای تغییر یا لغو نوبت با آرایشگاه تماس بگیرید.</span></p>
+    <button class="btn ghost" id="s-again">ثبت نوبت دیگر</button>
+  </div>
+
+  <div class="foot">ساعت‌ها به وقت تهران است</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="book-config.js"></script>
+<script>
+/* ---------- Jalali helpers (same as the barber app) ---------- */
+function gregorianToJalali(gy, gm, gd) {
+  var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+  var jy;
+  if (gy > 1600) { jy = 979; gy -= 1600; } else { jy = 0; gy -= 621; }
+  var gy2 = (gm > 2) ? (gy + 1) : gy;
+  var days = (365 * gy) + (parseInt((gy2 + 3) / 4)) - (parseInt((gy2 + 99) / 100)) + (parseInt((gy2 + 399) / 400)) - 80 + gd + g_d_m[gm - 1];
+  jy += 33 * parseInt(days / 12053);
+  days %= 12053;
+  jy += 4 * parseInt(days / 1461);
+  days %= 1461;
+  if (days > 365) { jy += parseInt((days - 1) / 365); days = (days - 1) % 365; }
+  var jm, jd;
+  if (days < 186) { jm = 1 + parseInt(days / 31); jd = 1 + (days % 31); }
+  else { jm = 7 + parseInt((days - 186) / 30); jd = 1 + ((days - 186) % 30); }
+  return [jy, jm, jd];
+}
+const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+const WEEKDAYS = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه']; // index = getUTCDay()
+const toFa = n => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
+const pad2 = n => (n < 10 ? '0' : '') + n;
+const timeFa = m => toFa(pad2(Math.floor(m / 60))) + ':' + toFa(pad2(m % 60));
+
+const MORNING = []; for (let m = 8*60+30; m <= 13*60+30; m += 30) MORNING.push(m);
+const EVENING = []; for (let m = 16*60; m <= 21*60+30; m += 30) EVENING.push(m);
+
+/* ---------- config / state ---------- */
+const CFG = globalThis.BOOK_CONFIG || {};
+const BASE = String(CFG.SUPABASE_URL || '').replace(/\/+$/, '');
+const KEY = String(CFG.SUPABASE_ANON_KEY || '');
+const CONFIGURED = /^https?:\/\/\S+$/.test(BASE) && KEY.length > 10;
+const $ = id => document.getElementById(id);
+
+let clockOffset = 0, winDays = 14, leadMin = 30;
+let taken = new Set();
+let days = [];
+let loaded = false, loading = false;
+let selDay = null, selSlot = null, busy = false;
+
+const keyOf = (jy, jm, jd, mins) => jy + '-' + jm + '-' + jd + '-' + mins;
+function wallNow(){
+  const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Tehran', year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', hourCycle:'h23' });
+  const p = {}; f.formatToParts(new Date(Date.now() + clockOffset)).forEach(x => p[x.type] = x.value);
+  return { y:+p.year, m:+p.month, d:+p.day, h:+p.hour % 24, mi:+p.minute };
+}
+function buildDays(){
+  const n = wallNow(), base = Date.UTC(n.y, n.m - 1, n.d);
+  days = [];
+  for (let i = 0; i <= winDays; i++) {
+    const dt = new Date(base + i * 864e5);
+    const gy = dt.getUTCFullYear(), gm = dt.getUTCMonth() + 1, gd = dt.getUTCDate();
+    const [jy, jm, jd] = gregorianToJalali(gy, gm, gd);
+    days.push({ i, gy, gm, gd, jy, jm, jd, dow: dt.getUTCDay() });
+  }
+}
+function slotState(day, mins){
+  if (taken.has(keyOf(day.jy, day.jm, day.jd, mins))) return 'taken';
+  const n = wallNow();
+  const wallSlot = Date.UTC(day.gy, day.gm - 1, day.gd, Math.floor(mins / 60), mins % 60);
+  const wallCur = Date.UTC(n.y, n.m - 1, n.d, n.h, n.mi);
+  if (wallSlot < wallCur + leadMin * 60000) return 'past';
+  return 'free';
+}
+const freeCount = day => MORNING.concat(EVENING).filter(m => slotState(day, m) === 'free').length;
+
+/* ---------- network ---------- */
+async function rpc(name, body){
+  const headers = { apikey: KEY, 'Content-Type': 'application/json' };
+  if (/^eyJ/.test(KEY)) headers.Authorization = 'Bearer ' + KEY;
+  const ctrl = new AbortController(); const t = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const res = await fetch(BASE + '/rest/v1/rpc/' + name, { method:'POST', headers, body: JSON.stringify(body || {}), signal: ctrl.signal });
+    let data = null; try { data = await res.json(); } catch (e) {}
+    return { ok: res.ok, status: res.status, data };
+  } catch (e) { return { ok:false, network:true }; }
+  finally { clearTimeout(t); }
+}
+function banner(html, kind){
+  const b = $('banner'); b.className = 'banner show ' + (kind || 'warn'); b.innerHTML = html;
+}
+function hideBanner(){ $('banner').className = 'banner'; }
+function toast(t){ const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 3200); }
+
+async function loadSlots(){
+  if (loading) return; loading = true;
+  const r = await rpc('booking_slots');
+  loading = false;
+  if (!r.ok || !r.data || !Array.isArray(r.data.slots)) {
+    if (!loaded) {
+      banner('ارتباط با سرور برقرار نشد. اینترنت (یا فیلترشکن) را بررسی کن. <button onclick="loadSlots()">تلاش دوباره</button>', 'bad');
+      $('days').innerHTML = ''; $('slots').innerHTML = '<div class="empty-note">اطلاعات نوبت‌ها بارگذاری نشد.</div>';
+    } else {
+      banner('اتصال قطع شد؛ ساعت‌های نمایش‌داده‌شده ممکن است قدیمی باشد. <button onclick="loadSlots()">به‌روزرسانی</button>');
+    }
+    return;
+  }
+  hideBanner();
+  const d = r.data;
+  clockOffset = (Number(d.now_ms) || Date.now()) - Date.now();
+  winDays = d.window_days || 14; leadMin = d.lead_min || 30;
+  taken = new Set(d.slots.map(s => keyOf(s[0], s[1], s[2], s[3] * 60 + s[4])));
+  buildDays();
+  if (!loaded) {
+    loaded = true;
+    const first = days.find(x => freeCount(x) > 0);
+    selDay = first ? first.i : 0;
+  }
+  if (selSlot && slotState(days[selDay], selSlot) !== 'free') {
+    selSlot = null; toast('این ساعت دیگر آزاد نیست؛ ساعت دیگری انتخاب کن');
+  }
+  render();
+}
+
+/* ---------- render ---------- */
+function render(){ renderMine(); renderDays(); renderSlots(); renderForm(); }
+function renderDays(){
+  const el = $('days'); el.innerHTML = '';
+  days.forEach(d => {
+    const full = freeCount(d) === 0;
+    const b = document.createElement('button');
+    b.className = 'day' + (d.dow === 5 ? ' fri' : '') + (full ? ' full' : '') + (d.i === selDay ? ' sel' : '');
+    b.disabled = full && d.i !== selDay;
+    const tag = d.i === 0 ? 'امروز' : d.i === 1 ? 'فردا' : '';
+    b.innerHTML = `<div class="dw">${WEEKDAYS[d.dow]}</div><div class="dn">${toFa(d.jd)}</div><div class="dm">${MONTHS[d.jm-1]}</div><span class="tag">${full ? 'پر' : tag}</span>`;
+    b.onclick = () => { if (full) return; selDay = d.i; selSlot = null; render(); };
+    el.appendChild(b);
+  });
+  const s = el.querySelector('.sel'); if (s && !renderDays.done) { renderDays.done = true; s.scrollIntoView({ inline:'center', block:'nearest' }); }
+}
+function slotBtn(day, m){
+  const st = slotState(day, m), b = document.createElement('button');
+  b.className = 'slot' + (st !== 'free' ? ' off' : '') + (selSlot === m ? ' sel' : '');
+  b.textContent = timeFa(m); b.disabled = st !== 'free';
+  b.onclick = () => { selSlot = m; render(); setTimeout(() => $('form-card').scrollIntoView({ behavior:'smooth', block:'start' }), 60); };
+  return b;
+}
+function renderSlots(){
+  const el = $('slots'); el.innerHTML = '';
+  const day = days[selDay]; if (!day) return;
+  if (freeCount(day) === 0) { el.innerHTML = '<div class="empty-note">برای این روز نوبت خالی نمانده است. روز دیگری را انتخاب کن.</div>'; return; }
+  [['صبح', MORNING], ['عصر و شب', EVENING]].forEach(([title, list]) => {
+    const t = document.createElement('div'); t.className = 'gtitle'; t.textContent = title; el.appendChild(t);
+    const g = document.createElement('div'); g.className = 'slots'; list.forEach(m => g.appendChild(slotBtn(day, m))); el.appendChild(g);
+  });
+}
+function whenText(day, mins){ return `${WEEKDAYS[day.dow]} ${toFa(day.jd)} ${MONTHS[day.jm-1]} ${toFa(day.jy)} — ساعت ${timeFa(mins)}`; }
+function renderForm(){
+  const card = $('form-card'), day = days[selDay];
+  if (selSlot == null || !day) { card.style.display = 'none'; return; }
+  card.style.display = '';
+  $('picked').textContent = 'نوبت انتخابی: ' + whenText(day, selSlot);
+}
+
+/* ---------- my bookings (stored only on this phone) ---------- */
+const MINE_KEY = 'arman_book_mine', LAST_KEY = 'arman_book_last';
+const getMine = () => { try { return JSON.parse(localStorage.getItem(MINE_KEY) || '[]'); } catch (e) { return []; } };
+function renderMine(){
+  const n = wallNow(), cur = Date.UTC(n.y, n.m - 1, n.d, n.h, n.mi);
+  const mine = getMine().filter(x => x.wall >= cur - 3600000).sort((a, b) => a.wall - b.wall);
+  try { localStorage.setItem(MINE_KEY, JSON.stringify(mine)); } catch (e) {}
+  $('mine').classList.toggle('show', mine.length > 0);
+  $('mine-list').innerHTML = mine.map(x => `<div class="mine-row"><span>${WEEKDAYS[x.dow]} ${toFa(x.jd)} ${MONTHS[x.jm-1]}</span><b>ساعت ${timeFa(x.mins)}</b></div>`).join('');
+}
+
+/* ---------- submit ---------- */
+const faDigits = s => String(s).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d));
+function normPhone(s){
+  let p = faDigits(s).replace(/\D/g, '');
+  if (/^0098/.test(p)) p = '0' + p.slice(4); else if (/^98/.test(p)) p = '0' + p.slice(2); else if (/^9\d{9}$/.test(p)) p = '0' + p;
+  return p;
+}
+const ERRORS = {
+  slot_taken:'این ساعت همین الان توسط شخص دیگری رزرو شد. لطفاً ساعت دیگری انتخاب کن.',
+  past_slot:'این ساعت دیگر قابل رزرو نیست. ساعت دیگری انتخاب کن.',
+  out_of_window:'رزرو فقط برای ۱۴ روز آینده امکان‌پذیر است.',
+  invalid_slot:'ساعت انتخابی معتبر نیست.',
+  invalid_name:'نام را درست وارد کن.',
+  invalid_phone:'شماره تلفن همراه معتبر نیست (مثلاً 09123456789).',
+  too_many:'برای این شماره بیش از حد مجاز (۲ نوبت فعال) نوبت ثبت شده است. برای تغییر با آرایشگاه تماس بگیر.',
+  busy:'تعداد درخواست‌ها زیاد است؛ چند دقیقه بعد دوباره تلاش کن.',
+  no_owner:'رزرو آنلاین هنوز فعال نشده است.'
+};
+function showErr(t){ const e = $('f-err'); e.textContent = t; e.classList.add('show'); }
+$('f-submit').onclick = async () => {
+  if (busy) return;
+  $('f-err').classList.remove('show');
+  const day = days[selDay]; if (!day || selSlot == null) return;
+  const name = $('f-name').value.trim().replace(/\s+/g, ' ');
+  const phone = normPhone($('f-phone').value);
+  const note = $('f-note').value.trim();
+  if (name.length < 2) return showErr('نام و نام خانوادگی را وارد کن.');
+  if (!/^09\d{9}$/.test(phone)) return showErr('شماره تلفن همراه را درست وارد کن (مثلاً 09123456789).');
+  if ($('f-web').value) { showDone(day, selSlot, name); return; } // honeypot: bots
+  busy = true; const btn = $('f-submit'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> در حال ثبت…';
+  const r = await rpc('book_appointment', { p_name:name, p_phone:phone, p_note:note, p_jy:day.jy, p_jm:day.jm, p_jd:day.jd, p_hour:Math.floor(selSlot/60), p_minute:selSlot%60 });
+  busy = false; btn.disabled = false; btn.textContent = 'ثبت نوبت';
+  if (r.network) return showErr('ارتباط با سرور برقرار نشد. اینترنت (یا فیلترشکن) را بررسی کن و دوباره تلاش کن.');
+  if (!r.ok) {
+    const code = r.data && r.data.message;
+    showErr(ERRORS[code] || 'ثبت نوبت انجام نشد. دوباره تلاش کن.');
+    if (code === 'slot_taken' || code === 'past_slot') { selSlot = null; loadSlots(); }
+    return;
+  }
+  try {
+    const mine = getMine(); const wall = Date.UTC(day.gy, day.gm - 1, day.gd, Math.floor(selSlot/60), selSlot%60);
+    mine.push({ jy:day.jy, jm:day.jm, jd:day.jd, dow:day.dow, mins:selSlot, wall });
+    localStorage.setItem(MINE_KEY, JSON.stringify(mine));
+    localStorage.setItem(LAST_KEY, JSON.stringify({ name, phone }));
+  } catch (e) {}
+  showDone(day, selSlot, name);
+  loadSlots();
+};
+function showDone(day, mins, name){
+  $('booking').style.display = 'none';
+  $('s-when').textContent = whenText(day, mins);
+  $('s-name').textContent = name;
+  const ph = String(CFG.SHOP_PHONE || '').replace(/[^\d+]/g, '');
+  if (ph) $('s-contact').innerHTML = 'برای تغییر یا لغو نوبت تماس بگیرید: <a href="tel:' + ph + '">' + ph + '</a>';
+  $('success').classList.add('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+$('s-again').onclick = () => {
+  $('success').classList.remove('show'); $('booking').style.display = '';
+  selSlot = null; $('f-note').value = ''; render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+/* ---------- start ---------- */
+try { const l = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); if (l) { $('f-name').value = l.name || ''; $('f-phone').value = l.phone || ''; } } catch (e) {}
+if (!CONFIGURED) {
+  $('booking').style.display = 'none';
+  banner('رزرو آنلاین هنوز فعال نشده است.', 'bad');
+} else {
+  loadSlots();
+  setInterval(() => { if (!document.hidden) loadSlots(); }, 45000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadSlots(); });
+  window.addEventListener('online', loadSlots);
+}
+</script>
+</body>
+</html>
