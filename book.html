@@ -8,9 +8,11 @@
 <meta name="color-scheme" content="light">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="ARMAN CUT">
-<link rel="icon" href="icon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="رزرو ARMAN CUT">
+<link rel="manifest" href="book-manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" href="book-icon-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="book-apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -33,11 +35,12 @@
     background:radial-gradient(520px 260px at 50% -40px, var(--accent-soft), transparent 70%), var(--bg);
   }
   @supports (-webkit-touch-callout:none){ input,textarea,select{font-size:16px !important;} }
-  #app{max-width:460px; margin:0 auto; padding:calc(26px + var(--safe-top)) 18px calc(40px + var(--safe-bottom));}
+  body{overscroll-behavior-y:none;}
+  #app{max-width:460px; margin:0 auto; padding:calc(26px + var(--safe-top)) max(18px, env(safe-area-inset-right)) calc(40px + var(--safe-bottom)) max(18px, env(safe-area-inset-left));}
   button{font-family:inherit;}
 
   header{margin-bottom:20px;}
-  .brand{font-size:22px; font-weight:800; letter-spacing:1.8px; direction:ltr; text-align:right;}
+  .brand{font-size:22px; font-weight:800; letter-spacing:1.8px; direction:ltr; text-align:left;}
   .brand .b2{color:var(--accent);}
   .sub{font-size:13.5px; color:var(--dim); margin-top:4px;}
 
@@ -46,14 +49,14 @@
   .step i{font-style:normal; width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff; font-size:12.5px; display:flex; align-items:center; justify-content:center;}
 
   /* days */
-  .days{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 8px; margin:0 -4px; scroll-snap-type:x proximity; scrollbar-width:none;}
+  .days{display:flex; gap:6px; overflow-x:auto; padding:2px 2px 8px; margin:0 -4px; scroll-snap-type:x proximity; scrollbar-width:none;}
   .days::-webkit-scrollbar{display:none;}
   .day{
-    flex:0 0 64px; scroll-snap-align:start; border:1.5px solid var(--border); background:var(--card); border-radius:14px;
+    flex:1 1 0; min-width:0; scroll-snap-align:start; border:1.5px solid var(--border); background:var(--card); border-radius:14px;
     padding:9px 4px 8px; text-align:center; cursor:pointer; color:var(--text); transition:transform .12s, background .15s, border-color .15s;
   }
   .day:active{transform:scale(.95);}
-  .day .dw{font-size:11.5px; color:var(--dim);}
+  .day .dw{font-size:11px; color:var(--dim); white-space:nowrap;}
   .day .dn{font-size:21px; font-weight:800; line-height:1.35;}
   .day .dm{font-size:11px; color:var(--dim);}
   .day .tag{display:block; font-size:10px; color:var(--accent); font-weight:700; min-height:14px;}
@@ -132,7 +135,16 @@
   @keyframes sp{to{transform:rotate(360deg);}}
   .skeleton{height:150px; border-radius:12px; background:linear-gradient(90deg,var(--surface),#f6f9fe,var(--surface)); background-size:200% 100%; animation:sk 1.2s infinite;}
   @keyframes sk{to{background-position:-200% 0;}}
-  .foot{font-size:11.5px; color:var(--faint); text-align:center; margin-top:8px; line-height:1.9;}
+  .foot{font-size:12px; color:var(--faint); text-align:center; margin-top:10px; line-height:2.1;}
+  .foot a{color:var(--accent); font-weight:700; text-decoration:none; direction:ltr; unicode-bidi:isolate; display:inline-block; padding:2px 8px;}
+  .mine .note{font-size:12.5px; color:var(--dim); line-height:1.9; margin-top:6px;}
+  .mine .note a{color:var(--accent); font-weight:700; text-decoration:none; direction:ltr; unicode-bidi:isolate;}
+  .install{display:none; position:relative;}
+  .install.show{display:block;}
+  .install h4{font-size:14px; margin-bottom:6px;}
+  .install p{font-size:12.5px; color:var(--dim); line-height:1.9; margin-bottom:10px;}
+  .install .x{position:absolute; top:10px; left:12px; background:none; border:none; font-size:18px; color:var(--faint); cursor:pointer; line-height:1;}
+  .install .btn{padding:11px 0; font-size:14.5px;}
   .toast{position:fixed; left:50%; bottom:calc(24px + var(--safe-bottom)); transform:translate(-50%,20px); background:var(--text); color:#fff; padding:11px 18px; border-radius:999px; font-size:13.5px; opacity:0; pointer-events:none; transition:.25s; z-index:20; max-width:90%; text-align:center;}
   .toast.show{opacity:1; transform:translate(-50%,0);}
 </style>
@@ -146,7 +158,7 @@
 
   <div class="banner warn" id="banner"></div>
 
-  <div class="card mine" id="mine"><h3>نوبت‌های ثبت‌شده‌ی شما</h3><div id="mine-list"></div></div>
+  <div class="card mine" id="mine"><h3>نوبت فعال شما</h3><div id="mine-list"></div><div class="note">هر نفر هم‌زمان فقط یک نوبت می‌تواند داشته باشد. برای تغییر یا لغو نوبت با مدیریت تماس بگیرید: <a class="tel" href="#"></a></div></div>
 
   <div id="booking">
     <div class="card">
@@ -177,11 +189,17 @@
     <h2>نوبت شما ثبت شد</h2>
     <div class="when" id="s-when"></div>
     <p id="s-name"></p>
-    <p style="margin-top:10px;">لطفاً چند دقیقه زودتر حضور داشته باشید.<br><span id="s-contact">برای تغییر یا لغو نوبت با آرایشگاه تماس بگیرید.</span></p>
-    <button class="btn ghost" id="s-again">ثبت نوبت دیگر</button>
+    <p style="margin-top:10px;">لطفاً چند دقیقه زودتر حضور داشته باشید.<br><span id="s-contact"></span></p>
   </div>
 
-  <div class="foot">ساعت‌ها به وقت تهران است</div>
+  <div class="card install" id="install">
+    <button class="x" id="install-x" aria-label="بستن">×</button>
+    <h4>نصب روی صفحه اصلی گوشی</h4>
+    <p id="install-text"></p>
+    <button class="btn" id="install-btn" style="display:none;">نصب برنامه</button>
+  </div>
+
+  <div class="foot">ساعت‌ها به وقت تهران است<br>تماس با مدیریت: <a class="tel" href="#"></a></div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -210,8 +228,24 @@ const toFa = n => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 const pad2 = n => (n < 10 ? '0' : '') + n;
 const timeFa = m => toFa(pad2(Math.floor(m / 60))) + ':' + toFa(pad2(m % 60));
 
-const MORNING = []; for (let m = 8*60+30; m <= 13*60+30; m += 30) MORNING.push(m);
-const EVENING = []; for (let m = 16*60; m <= 21*60+30; m += 30) EVENING.push(m);
+const MORNING = []; for (let m = 9*60; m <= 13*60; m += 30) MORNING.push(m);
+const EVENING = []; for (let m = 16*60+30; m <= 21*60; m += 30) EVENING.push(m);
+function jalaliToGregorian(jy, jm, jd) {
+  var gy;
+  if (jy > 979) { gy = 1600; jy -= 979; } else { gy = 621; }
+  var days = (365 * jy) + (parseInt(jy / 33) * 8) + parseInt(((jy % 33) + 3) / 4) + 78 + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+  gy += 400 * parseInt(days / 146097);
+  days %= 146097;
+  if (days > 36524) { days -= 1; gy += 100 * parseInt(days / 36524); days %= 36524; if (days >= 365) days++; }
+  gy += 4 * parseInt(days / 1461);
+  days %= 1461;
+  if (days > 365) { gy += parseInt((days - 1) / 365); days = (days - 1) % 365; }
+  var gd = days + 1;
+  var sal_a = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  var gm;
+  for (gm = 0; gm < 13; gm++) { var v = sal_a[gm]; if (gd <= v) break; gd -= v; }
+  return [gy, gm, gd];
+}
 
 /* ---------- config / state ---------- */
 const CFG = globalThis.BOOK_CONFIG || {};
@@ -220,11 +254,12 @@ const KEY = String(CFG.SUPABASE_ANON_KEY || '');
 const CONFIGURED = /^https?:\/\/\S+$/.test(BASE) && KEY.length > 10;
 const $ = id => document.getElementById(id);
 
-let clockOffset = 0, winDays = 14, leadMin = 30;
+let clockOffset = 0, winDays = 4, leadMin = 30;
 let taken = new Set();
 let days = [];
 let loaded = false, loading = false;
-let selDay = null, selSlot = null, busy = false;
+let selDay = null, selSlot = null, busy = false, successShown = false;
+const PHONE = String(CFG.SHOP_PHONE || '09359097238').replace(/[^\d+]/g, '');
 
 const keyOf = (jy, jm, jd, mins) => jy + '-' + jm + '-' + jd + '-' + mins;
 function wallNow(){
@@ -286,7 +321,7 @@ async function loadSlots(){
   hideBanner();
   const d = r.data;
   clockOffset = (Number(d.now_ms) || Date.now()) - Date.now();
-  winDays = d.window_days || 14; leadMin = d.lead_min || 30;
+  winDays = Math.min(d.window_days || 4, 4); leadMin = d.lead_min || 30;
   taken = new Set(d.slots.map(s => keyOf(s[0], s[1], s[2], s[3] * 60 + s[4])));
   buildDays();
   if (!loaded) {
@@ -298,10 +333,15 @@ async function loadSlots(){
     selSlot = null; toast('این ساعت دیگر آزاد نیست؛ ساعت دیگری انتخاب کن');
   }
   render();
+  syncMine().then(render);
 }
 
 /* ---------- render ---------- */
-function render(){ renderMine(); renderDays(); renderSlots(); renderForm(); }
+function render(){
+  const act = activeMine().length > 0;
+  $('booking').style.display = (act || successShown) ? 'none' : '';
+  renderMine(); renderDays(); renderSlots(); renderForm();
+}
 function renderDays(){
   const el = $('days'); el.innerHTML = '';
   days.forEach(d => {
@@ -340,15 +380,41 @@ function renderForm(){
   $('picked').textContent = 'نوبت انتخابی: ' + whenText(day, selSlot);
 }
 
-/* ---------- my bookings (stored only on this phone) ---------- */
-const MINE_KEY = 'arman_book_mine', LAST_KEY = 'arman_book_last';
-const getMine = () => { try { return JSON.parse(localStorage.getItem(MINE_KEY) || '[]'); } catch (e) { return []; } };
-function renderMine(){
+/* ---------- my bookings (kept on this phone, checked against the server) ---------- */
+const MINE_KEY = 'arman_book_mine2', LAST_KEY = 'arman_book_last', DEV_KEY = 'arman_book_dev';
+function getMine(){ try { return (JSON.parse(localStorage.getItem(MINE_KEY) || '[]') || []).filter(x => x && x.id); } catch (e) { return []; } }
+function saveMine(l){ try { localStorage.setItem(MINE_KEY, JSON.stringify(l)); } catch (e) {} }
+function entryInfo(x){
+  const [gy, gm, gd] = jalaliToGregorian(x.jy, x.jm, x.jd);
+  return { ...x, wall: Date.UTC(gy, gm - 1, gd, Math.floor(x.mins / 60), x.mins % 60), dow: new Date(Date.UTC(gy, gm - 1, gd)).getUTCDay() };
+}
+function activeMine(){
   const n = wallNow(), cur = Date.UTC(n.y, n.m - 1, n.d, n.h, n.mi);
-  const mine = getMine().filter(x => x.wall >= cur - 3600000).sort((a, b) => a.wall - b.wall);
-  try { localStorage.setItem(MINE_KEY, JSON.stringify(mine)); } catch (e) {}
+  return getMine().map(entryInfo).filter(x => x.wall > cur).sort((a, b) => a.wall - b.wall);
+}
+function renderMine(){
+  const mine = successShown ? [] : activeMine();
   $('mine').classList.toggle('show', mine.length > 0);
   $('mine-list').innerHTML = mine.map(x => `<div class="mine-row"><span>${WEEKDAYS[x.dow]} ${toFa(x.jd)} ${MONTHS[x.jm-1]}</span><b>ساعت ${timeFa(x.mins)}</b></div>`).join('');
+}
+async function syncMine(){
+  const mine = getMine(); if (!mine.length) return;
+  const r = await rpc('my_bookings', { p_ids: mine.map(x => x.id).slice(0, 10) });
+  if (!r.ok || !Array.isArray(r.data)) return;          // offline: keep what we have
+  const srv = new Map(r.data.map(x => [x.id, x]));
+  saveMine(mine.filter(x => srv.has(x.id)).map(x => { const v = srv.get(x.id); return { id:x.id, jy:v.jy, jm:v.jm, jd:v.jd, mins:v.h * 60 + v.mi }; }));
+}
+function deviceId(){
+  let id = null;
+  try { id = localStorage.getItem(DEV_KEY); } catch (e) {}
+  if (!id) { const m = document.cookie.match(/(?:^|; )arman_dev=([^;]+)/); if (m) id = m[1]; }
+  if (!id || !/^[A-Za-z0-9-]{16,64}$/.test(id)) {
+    id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2));
+    id = id.replace(/[^A-Za-z0-9-]/g, ''); while (id.length < 16) id += '0';
+  }
+  try { localStorage.setItem(DEV_KEY, id); } catch (e) {}
+  try { document.cookie = 'arman_dev=' + id + '; max-age=63072000; path=/; SameSite=Lax'; } catch (e) {}
+  return id;
 }
 
 /* ---------- submit ---------- */
@@ -361,11 +427,14 @@ function normPhone(s){
 const ERRORS = {
   slot_taken:'این ساعت همین الان توسط شخص دیگری رزرو شد. لطفاً ساعت دیگری انتخاب کن.',
   past_slot:'این ساعت دیگر قابل رزرو نیست. ساعت دیگری انتخاب کن.',
-  out_of_window:'رزرو فقط برای ۱۴ روز آینده امکان‌پذیر است.',
+  out_of_window:'رزرو فقط برای ۵ روز آینده امکان‌پذیر است.',
   invalid_slot:'ساعت انتخابی معتبر نیست.',
   invalid_name:'نام را درست وارد کن.',
   invalid_phone:'شماره تلفن همراه معتبر نیست (مثلاً 09123456789).',
-  too_many:'برای این شماره بیش از حد مجاز (۲ نوبت فعال) نوبت ثبت شده است. برای تغییر با آرایشگاه تماس بگیر.',
+  invalid_device:'مرورگر شما پشتیبانی نمی‌شود؛ صفحه را دوباره باز کن.',
+  too_many:'شما در حال حاضر یک نوبت فعال دارید. بعد از انجام آن می‌توانید نوبت جدید بگیرید، یا برای تغییر با مدیریت تماس بگیرید.',
+  too_many_ip:'تعداد نوبت‌های ثبت‌شده از این شبکه زیاد است. لطفاً با مدیریت تماس بگیرید.',
+  blocked:'امکان ثبت نوبت آنلاین برای این شماره وجود ندارد. با مدیریت تماس بگیرید.',
   busy:'تعداد درخواست‌ها زیاد است؛ چند دقیقه بعد دوباره تلاش کن.',
   no_owner:'رزرو آنلاین هنوز فعال نشده است.'
 };
@@ -381,7 +450,7 @@ $('f-submit').onclick = async () => {
   if (!/^09\d{9}$/.test(phone)) return showErr('شماره تلفن همراه را درست وارد کن (مثلاً 09123456789).');
   if ($('f-web').value) { showDone(day, selSlot, name); return; } // honeypot: bots
   busy = true; const btn = $('f-submit'); btn.disabled = true; btn.innerHTML = '<span class="spin"></span> در حال ثبت…';
-  const r = await rpc('book_appointment', { p_name:name, p_phone:phone, p_note:note, p_jy:day.jy, p_jm:day.jm, p_jd:day.jd, p_hour:Math.floor(selSlot/60), p_minute:selSlot%60 });
+  const r = await rpc('book_appointment', { p_name:name, p_phone:phone, p_note:note, p_jy:day.jy, p_jm:day.jm, p_jd:day.jd, p_hour:Math.floor(selSlot/60), p_minute:selSlot%60, p_device:deviceId() });
   busy = false; btn.disabled = false; btn.textContent = 'ثبت نوبت';
   if (r.network) return showErr('ارتباط با سرور برقرار نشد. اینترنت (یا فیلترشکن) را بررسی کن و دوباره تلاش کن.');
   if (!r.ok) {
@@ -391,30 +460,24 @@ $('f-submit').onclick = async () => {
     return;
   }
   try {
-    const mine = getMine(); const wall = Date.UTC(day.gy, day.gm - 1, day.gd, Math.floor(selSlot/60), selSlot%60);
-    mine.push({ jy:day.jy, jm:day.jm, jd:day.jd, dow:day.dow, mins:selSlot, wall });
-    localStorage.setItem(MINE_KEY, JSON.stringify(mine));
+    const mine = getMine().concat([{ id: r.data && r.data.id, jy:day.jy, jm:day.jm, jd:day.jd, mins:selSlot }]);
+    saveMine(mine.filter(x => x.id));
     localStorage.setItem(LAST_KEY, JSON.stringify({ name, phone }));
   } catch (e) {}
   showDone(day, selSlot, name);
   loadSlots();
 };
 function showDone(day, mins, name){
-  $('booking').style.display = 'none';
+  successShown = true;
+  $('booking').style.display = 'none'; $('mine').classList.remove('show');
   $('s-when').textContent = whenText(day, mins);
   $('s-name').textContent = name;
-  const ph = String(CFG.SHOP_PHONE || '').replace(/[^\d+]/g, '');
-  if (ph) $('s-contact').innerHTML = 'برای تغییر یا لغو نوبت تماس بگیرید: <a href="tel:' + ph + '">' + ph + '</a>';
+  $('s-contact').innerHTML = 'برای تغییر یا لغو نوبت با مدیریت تماس بگیرید: <a href="tel:' + PHONE + '">' + toFa(PHONE) + '</a>';
   $('success').classList.add('show');
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-$('s-again').onclick = () => {
-  $('success').classList.remove('show'); $('booking').style.display = '';
-  selSlot = null; $('f-note').value = ''; render();
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-};
-
 /* ---------- start ---------- */
+document.querySelectorAll('a.tel').forEach(a => { a.href = 'tel:' + PHONE; a.textContent = toFa(PHONE); });
 try { const l = JSON.parse(localStorage.getItem(LAST_KEY) || 'null'); if (l) { $('f-name').value = l.name || ''; $('f-phone').value = l.phone || ''; } } catch (e) {}
 if (!CONFIGURED) {
   $('booking').style.display = 'none';
@@ -424,6 +487,31 @@ if (!CONFIGURED) {
   setInterval(() => { if (!document.hidden) loadSlots(); }, 45000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) loadSlots(); });
   window.addEventListener('online', loadSlots);
+}
+
+/* ---------- install as app (PWA) ---------- */
+(function(){
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  let dismissed = false; try { dismissed = localStorage.getItem('arman_book_noinstall') === '1'; } catch (e) {}
+  if (standalone || dismissed) return;
+  const card = $('install'), txt = $('install-text'), btn = $('install-btn');
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let deferred = null;
+  if (isIOS) {
+    txt.innerHTML = 'برای دسترسی سریع‌تر: در <b>Safari</b> دکمه اشتراک‌گذاری (مربع با فلش ↑) را بزن و <b>Add to Home Screen</b> را انتخاب کن.';
+    card.classList.add('show');
+  }
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault(); deferred = e;
+    txt.textContent = 'برای دسترسی سریع‌تر، این صفحه را مثل یک برنامه روی گوشی نصب کن.';
+    btn.style.display = ''; card.classList.add('show');
+  });
+  btn.onclick = async () => { if (!deferred) return; deferred.prompt(); try { await deferred.userChoice; } catch (e) {} deferred = null; card.classList.remove('show'); };
+  $('install-x').onclick = () => { card.classList.remove('show'); try { localStorage.setItem('arman_book_noinstall', '1'); } catch (e) {} };
+  window.addEventListener('appinstalled', () => card.classList.remove('show'));
+})();
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('book-sw.js', { scope: './book.html' }).catch(() => {}); });
 }
 </script>
 </body>

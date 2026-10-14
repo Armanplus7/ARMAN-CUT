@@ -1,0 +1,19 @@
+{
+  "id": "./book.html",
+  "name": "رزرو نوبت ARMAN CUT",
+  "short_name": "رزرو ARMAN CUT",
+  "description": "رزرو آنلاین نوبت آرایشگاه",
+  "start_url": "./book.html",
+  "scope": "./book.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f7fc",
+  "theme_color": "#f4f7fc",
+  "lang": "fa",
+  "dir": "rtl",
+  "icons": [
+    { "src": "book-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "book-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "book-icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
