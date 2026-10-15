@@ -1687,8 +1687,64 @@ function showToast(text){
   document.getElementById('toast-text').textContent = text;
   toast.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2200);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), text.length > 30 ? 4500 : 2200);
 }
+
+/* ============ Pull to refresh ============ */
+(function(){
+  const main = document.querySelector('main');
+  if(!main) return;
+  const ind = document.createElement('div');
+  ind.id = 'ptr';
+  ind.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></svg>';
+  document.body.appendChild(ind);
+  const st = document.createElement('style');
+  st.textContent = '#ptr{position:fixed;top:calc(var(--safe-top,0px) + 8px);left:50%;width:36px;height:36px;margin-left:-18px;border-radius:50%;background:var(--bg-2);border:1px solid var(--border);color:var(--gold);display:flex;align-items:center;justify-content:center;z-index:30;opacity:0;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.12);transform:translateY(-60px)}#ptr svg{width:18px;height:18px}#ptr.spin svg{animation:ptrspin .8s linear infinite}@keyframes ptrspin{to{transform:rotate(360deg)}}';
+  document.head.appendChild(st);
+  const TH = 70;
+  let y0 = null, dy = 0, busy = false;
+  function setPos(d){
+    ind.style.transition = 'none';
+    ind.style.opacity = Math.min(1, d / TH);
+    ind.style.transform = 'translateY(' + (Math.min(d, 110) * 0.8 - 50) + 'px) rotate(' + (d * 3) + 'deg)';
+  }
+  function hide(){
+    ind.style.transition = 'transform .25s, opacity .25s';
+    ind.style.opacity = 0; ind.style.transform = 'translateY(-60px)';
+    ind.classList.remove('spin');
+  }
+  main.addEventListener('touchstart', e => {
+    y0 = (!busy && main.scrollTop <= 0 && e.touches.length === 1) ? e.touches[0].clientY : null; dy = 0;
+  }, {passive:true});
+  main.addEventListener('touchmove', e => {
+    if(y0 === null) return;
+    dy = e.touches[0].clientY - y0;
+    if(dy <= 0 || main.scrollTop > 0){ if(dy <= 0) { y0 = null; hide(); } return; }
+    setPos(dy * 0.6 + 0);
+  }, {passive:true});
+  function end(){
+    if(y0 === null) return;
+    const ok = dy * 0.6 >= TH * 0.7;
+    y0 = null;
+    if(!ok){ hide(); return; }
+    busy = true;
+    ind.style.transition = 'transform .2s';
+    ind.style.transform = 'translateY(14px)'; ind.style.opacity = 1;
+    ind.classList.add('spin');
+    const done = () => { busy = false; hide(); };
+    if(sync){
+      const t0 = Date.now();
+      sync.syncNow().catch(()=>{}).then(() => {
+        const s = sync.getState();
+        if(s && s.status === 'synced') showToast('به‌روز شد');
+        else if(s && (s.status === 'offline' || s.status === 'error')) showToast('اتصال برقرار نشد');
+        setTimeout(done, Math.max(0, 700 - (Date.now() - t0)));
+      });
+    } else { setTimeout(() => { renderToday(); renderCalendar(); done(); }, 500); }
+  }
+  main.addEventListener('touchend', end, {passive:true});
+  main.addEventListener('touchcancel', () => { y0 = null; hide(); }, {passive:true});
+})();
 
 /* ============ Reminder notifications (while the app is open) ============ */
 const notifiedApptIds = new Set();
@@ -2040,8 +2096,38 @@ document.getElementById('menu-logout').addEventListener('click', () => {
 });
 document.getElementById('menu-btn').addEventListener('click', () => { if(sync) renderSyncUI(sync.getState()); });
 
+const KNOWN_ONLINE_KEY = 'arman_known_online';
 const knownOnline = new Set();
-let knownOnlineReady = false;
+let knownOnlineFirstRun = false;
+try{
+  const raw = localStorage.getItem(KNOWN_ONLINE_KEY);
+  if(raw === null) knownOnlineFirstRun = true;
+  else JSON.parse(raw).forEach(id => knownOnline.add(id));
+}catch(e){}
+function saveKnownOnline(){
+  try{ localStorage.setItem(KNOWN_ONLINE_KEY, JSON.stringify(Array.from(knownOnline).slice(-500))); }catch(e){}
+}
+function onlineApptText(a){
+  const who = (a.name && a.name.trim()) ? a.name.trim() : ((a.phone && a.phone.trim()) ? a.phone : 'مشتری');
+  const dow = WEEKDAY_FULL[apptDateObj(a).getDay()];
+  const time = toFa(pad2(a.hour)) + ':' + toFa(pad2(a.minute));
+  return `آقای ${who} برای ${dow} ${toFa(a.jd)} ${MONTH_NAMES[a.jm-1]} ساعت ${time} نوبت رزرو کرد`;
+}
+function notifyNewOnline(list){
+  const upcoming = list.filter(a => apptDateObj(a).getTime() > Date.now() - 3600000);
+  if(!upcoming.length) return;
+  const items = upcoming.length > 5
+    ? [{ text: toFa(upcoming.length) + ' نوبت آنلاین جدید ثبت شد', tag: 'online-many' }]
+    : upcoming.map(a => ({ text: onlineApptText(a), tag: 'online-' + a.id }));
+  items.forEach(it => {
+    showToast(it.text);
+    if('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator){
+      navigator.serviceWorker.ready.then(reg => reg.showNotification('نوبت آنلاین جدید', {
+        body: it.text, icon: 'icon-192.png', badge: 'badge-96.png', tag: it.tag, dir: 'rtl', lang: 'fa'
+      })).catch(()=>{});
+    }
+  });
+}
 let sync = null;
 try{
   if(window.ArmanSync){
@@ -2056,7 +2142,8 @@ try{
         renderToday(); renderCalendar(); if(typeof renderDayList === 'function') renderDayList();
         const fresh = appointments.filter(a => a.source === 'online' && !knownOnline.has(a.id));
         fresh.forEach(a => knownOnline.add(a.id));
-        if(fresh.length && fresh.length <= 5 && knownOnlineReady) showToast(fresh.length === 1 ? 'یک نوبت آنلاین جدید ثبت شد' : toFa(fresh.length) + ' نوبت آنلاین جدید ثبت شد');
+        saveKnownOnline();
+        notifyNewOnline(fresh);
       },
       onStatus: renderSyncUI
     });
@@ -2067,8 +2154,7 @@ try{
 renderHeader();
 populateSelects();
 loadAppointments();
-appointments.forEach(a => { if(a.source === 'online') knownOnline.add(a.id); });
-setTimeout(() => { knownOnlineReady = true; }, 4000);
+if(knownOnlineFirstRun){ appointments.forEach(a => { if(a.source === 'online') knownOnline.add(a.id); }); saveKnownOnline(); }
 if(sync){ sync.start(); renderSyncUI(sync.getState()); }
 positionPill();
 checkSharedContact();
